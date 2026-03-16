@@ -1,0 +1,7 @@
+target/
+app.log
+*.class
+.mvn/
+!.mvn/wrapper/
+.env
+*.jar
