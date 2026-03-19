@@ -1,5 +1,5 @@
 package com.Extra2Essentials.Extra2Essentials.controller;
-
+import org.springframework.security.core.Authentication;
 import com.Extra2Essentials.Extra2Essentials.model.*;
 import com.Extra2Essentials.Extra2Essentials.repository.UserRepository;
 import com.Extra2Essentials.Extra2Essentials.security.JwtUtil;
