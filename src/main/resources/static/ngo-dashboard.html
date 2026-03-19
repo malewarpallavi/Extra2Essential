@@ -329,8 +329,14 @@
     }
   }
 
-  function renderDonCard(d) {
+  function renderDonCard(d) 
+  {
     const isClaimed = d.status !== 'AVAILABLE';
+    const phone = d.donor?.phone;
+    const waLink = phone 
+      ? `https://wa.me/91${phone}?text=Hi! I'm from ${name} NGO. I'd like to collect your donation: ${d.title}` 
+      : null;
+
     return `
       <div class="don-card">
         <div class="don-card-top">
@@ -346,8 +352,16 @@
           <div class="don-meta-item">📅 <strong>${d.pickupDate}</strong></div>
         </div>
         ${isClaimed
-          ? `<div class="btn-claimed">✅ Already Claimed</div>`
-          : `<button class="btn-claim" onclick="claimDonation(${d.id}, this)">Claim This Donation →</button>`
+          ? `<div class="btn-claimed">✅ Already Claimed</div>
+            ${waLink ? `<a href="${waLink}" target="_blank" 
+              style="display:block;text-align:center;margin-top:0.5rem;padding:0.5rem;
+              background:#25D366;color:#fff;border-radius:8px;text-decoration:none;
+              font-size:0.85rem;font-weight:600">
+              💬 Contact on WhatsApp
+            </a>` : ''}`
+          : `<button class="btn-claim" onclick="claimDonation(${d.id}, this)">
+              Claim This Donation →
+            </button>`
         }
       </div>`;
   }

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Volunteer Dashboard — Extra2Essential</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--green:#1a7c4f;--green-light:#22a86a;--green-pale:#e8f7ef;--earth:#c8702a;--earth-light:#f0a865;--cream:#faf7f2;--dark:#141a12;--text:#2d3a28;--muted:#7a8c73;--white:#ffffff;--border:#e2ede8;--sidebar-w:260px}
+    body{font-family:'DM Sans',sans-serif;background:#f0f4f1;color:var(--text);display:flex;min-height:100vh}
+    .sidebar{width:var(--sidebar-w);background:var(--dark);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;padding:2rem 1.5rem}
+    .sidebar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;text-decoration:none;margin-bottom:2.5rem;display:block;white-space:nowrap}
+    .sidebar-logo span{color:var(--earth-light)}
+    .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 0.75rem;border-radius:10px;color:rgba(255,255,255,0.5);font-size:0.92rem;font-weight:500;transition:all 0.2s;cursor:pointer;border:none;background:none;width:100%;text-align:left}
+    .nav-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+    .nav-item.active{background:rgba(34,168,106,0.15);color:var(--green-light)}
+    .sidebar-footer{margin-top:auto}
+    .user-card{background:rgba(255,255,255,0.06);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.75rem}
+    .user-avatar{width:38px;height:38px;border-radius:50%;background:#8b5cf6;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;flex-shrink:0}
+    .user-info strong{display:block;color:#fff;font-size:0.88rem}
+    .user-info span{color:rgba(255,255,255,0.35);font-size:0.75rem}
+    .logout-btn{width:100%;margin-top:0.75rem;padding:0.6rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.4);font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+    .logout-btn:hover{background:rgba(229,62,62,0.1);color:#fc8181}
+    .main{margin-left:var(--sidebar-w);flex:1;padding:2rem}
+    .page-header{margin-bottom:2rem}
+    .page-header h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--dark)}
+    .page-header p{color:var(--muted);font-size:0.95rem;margin-top:0.3rem}
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem}
+    .stat-card{background:#fff;border-radius:16px;padding:1.4rem;border:1px solid var(--border)}
+    .stat-card.highlight{background:#8b5cf6}
+    .stat-card .stat-icon{font-size:1.6rem;margin-bottom:0.8rem;display:block}
+    .stat-card .stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.9rem;color:var(--dark)}
+    .stat-card.highlight .stat-val,.stat-card.highlight .stat-label{color:#fff}
+    .stat-card .stat-label{font-size:0.82rem;color:var(--muted);margin-top:0.2rem}
+    .section-card{background:#fff;border-radius:20px;padding:1.5rem;border:1px solid var(--border)}
+    .section-card h2{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--dark);margin-bottom:1.2rem}
+    .don-card{border:1.5px solid var(--border);border-radius:16px;padding:1.2rem;background:#fafafa;margin-bottom:1rem;transition:all 0.2s}
+    .don-card:hover{border-color:var(--green);background:#fff}
+    .don-card-top{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem}
+    .don-cat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+    .cat-FOOD{background:#fff3e0}.cat-CLOTHES{background:#e8f5e9}.cat-BOOKS{background:#e3f2fd}.cat-OTHER{background:#f3e5f5}
+    .don-meta{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;font-size:0.82rem;color:var(--muted)}
+    .btn-volunteer{width:100%;padding:0.7rem;background:#8b5cf6;color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s}
+    .btn-volunteer:hover{background:#7c3aed}
+    .btn-wa{display:block;text-align:center;margin-top:0.5rem;padding:0.6rem;background:#25D366;color:#fff;border-radius:10px;text-decoration:none;font-size:0.88rem;font-weight:600}
+    .empty-state{text-align:center;padding:2.5rem;color:var(--muted)}
+    .empty-state .empty-icon{font-size:2.5rem;display:block;margin-bottom:0.8rem}
+    .view{display:none}
+    .view.active{display:block}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">Extra2<span>Essential</span></a>
+  <button class="nav-item active" onclick="showView('dashboard',this)"><span>🏠</span> Dashboard</button>
+  <button class="nav-item" onclick="showView('browse',this)"><span>🔍</span> Browse Tasks</button>
+  <button class="nav-item" onclick="showView('mytasks',this)"><span>📋</span> My Tasks</button>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="avatarInitial">V</div>
+      <div class="user-info">
+        <strong id="sidebarName">Volunteer</strong>
+        <span>🙋 Volunteer</span>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">← Sign Out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="page-header">
+      <h1>Welcome, <span id="welcomeName">Volunteer</span>! 🙋</h1>
+      <p>Help collect and deliver donations to NGOs</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card highlight">
+        <span class="stat-icon">📦</span>
+        <div class="stat-val" id="statAvail">0</div>
+        <div class="stat-label">Available Tasks</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">✅</span>
+        <div class="stat-val" id="statDone">0</div>
+        <div class="stat-label">Tasks Completed</div>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">🏆</span>
+        <div class="stat-val" id="statPoints">0</div>
+        <div class="stat-label">Volunteer Points</div>
+      </div>
+    </div>
+    <div class="section-card">
+      <h2>Available Donations to Collect</h2>
+      <div id="dashList"><div class="empty-state"><span class="empty-icon">⏳</span><p>Loading...</p></div></div>
+    </div>
+  </div>
+
+  <!-- BROWSE -->
+  <div class="view" id="view-browse">
+    <div class="page-header">
+      <h1>Browse Tasks 🔍</h1>
+      <p>Find donations to collect and deliver</p>
+    </div>
+    <div class="section-card">
+      <div id="browseList"><div class="empty-state"><span class="empty-icon">⏳</span><p>Loading...</p></div></div>
+    </div>
+  </div>
+
+  <!-- MY TASKS -->
+  <div class="view" id="view-mytasks">
+    <div class="page-header">
+      <h1>My Tasks 📋</h1>
+      <p>Donations you have claimed for pickup</p>
+    </div>
+    <div class="section-card">
+      <div id="mytasksList"><div class="empty-state"><span class="empty-icon">📋</span><p>No tasks yet. Browse and claim some!</p></div></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const token = localStorage.getItem('token');
+const name = localStorage.getItem('name') || 'Volunteer';
+const role = localStorage.getItem('role');
+
+if (!token || role !== 'VOLUNTEER') window.location.href = 'login.html';
+
+document.getElementById('welcomeName').textContent = name;
+document.getElementById('sidebarName').textContent = name;
+document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
+
+const catEmoji = { FOOD:'🍱', CLOTHES:'👗', BOOKS:'📚', OTHER:'📦' };
+
+function showView(v, btn) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(v==='browse') loadDonations('browseList');
+  if(v==='mytasks') loadDonations('mytasksList');
+}
+
+function renderCard(d) {
+  const phone = d.donor?.phone;
+  const waMsg = encodeURIComponent(`Hi! I'm ${name}, a volunteer from Extra2Essential. I'd like to collect your donation: "${d.title}" (${d.quantity} items) from ${d.city}. Pickup date: ${d.pickupDate}`);
+  const waLink = phone ? `https://wa.me/91${phone}?text=${waMsg}` : null;
+
+  return `
+    <div class="don-card">
+      <div class="don-card-top">
+        <div class="don-cat-icon cat-${d.category}">${catEmoji[d.category]||'📦'}</div>
+        <div>
+          <strong style="font-size:1rem;color:var(--dark)">${d.title}</strong>
+          <div style="font-size:0.8rem;color:var(--muted)">by ${d.donor?.name||'Donor'}</div>
+        </div>
+      </div>
+      <div class="don-meta">
+        <span>📍 ${d.city}</span>
+        <span>📦 ${d.quantity} items</span>
+        <span>📅 ${d.pickupDate}</span>
+        ${d.address ? `<span>🏠 ${d.address.substring(0,40)}...</span>` : ''}
+      </div>
+      ${d.status === 'AVAILABLE'
+        ? `<button class="btn-volunteer" onclick="claimTask(${d.id}, this)">🙋 Volunteer for Pickup</button>`
+        : `<div style="padding:0.6rem;background:var(--green-pale);color:var(--green);border-radius:8px;text-align:center;font-weight:600;font-size:0.88rem">✅ ${d.status}</div>`
+      }
+      ${waLink ? `<a class="btn-wa" href="${waLink}" target="_blank">💬 WhatsApp Donor</a>` : ''}
+    </div>`;
+}
+
+async function loadDonations(elId) {
+  const el = document.getElementById(elId);
+  try {
+    const res = await fetch('/api/donations', { headers:{'Authorization':'Bearer '+token} });
+    const donations = await res.json();
+    const available = donations.filter(d => d.status === 'AVAILABLE');
+    document.getElementById('statAvail').textContent = available.length;
+    document.getElementById('statPoints').textContent = available.length * 5;
+    if(available.length === 0) {
+      el.innerHTML = `<div class="empty-state"><span class="empty-icon">📦</span><p>No available donations right now.</p></div>`;
+    } else {
+      el.innerHTML = available.map(renderCard).join('');
+    }
+  } catch(e) {
+    el.innerHTML = `<div class="empty-state"><span class="empty-icon">❌</span><p>Failed to load.</p></div>`;
+  }
+}
+
+async function claimTask(id, btn) {
+  btn.disabled = true; btn.textContent = 'Claiming...';
+  try {
+    const res = await fetch(`/api/donations/${id}/claim`, {
+      method:'PUT', headers:{'Authorization':'Bearer '+token}
+    });
+    if(res.ok) {
+      btn.textContent = '✅ Claimed! Contact donor on WhatsApp';
+      btn.style.background = 'var(--green)';
+      document.getElementById('statDone').textContent = 
+        parseInt(document.getElementById('statDone').textContent) + 1;
+    } else {
+      btn.textContent = 'Already taken'; btn.disabled = true;
+    }
+  } catch(e) {
+    btn.textContent = 'Error'; btn.disabled = false;
+  }
+}
+
+function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+loadDonations('dashList');
+</script>
+</body>
+</html>

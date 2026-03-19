@@ -190,7 +190,7 @@
     <p class="subtitle">Already registered? <a href="login.html">Sign in →</a></p>
 
     <!-- ROLE SELECTOR -->
-    <div class="role-selector">
+    <div class="role-selector" style="grid-template-columns:1fr 1fr 1fr">
       <div class="role-btn active" id="donorBtn" onclick="selectRole('DONOR')">
         <span class="role-emoji">📦</span>
         <span class="role-name">Donor</span>
@@ -200,6 +200,11 @@
         <span class="role-emoji">🏢</span>
         <span class="role-name">NGO</span>
         <span class="role-desc">I represent an NGO</span>
+      </div>
+      <div class="role-btn" id="volunteerBtn" onclick="selectRole('VOLUNTEER')">
+        <span class="role-emoji">🙋</span>
+        <span class="role-name">Volunteer</span>
+        <span class="role-desc">I want to help collect</span>
       </div>
     </div>
 
@@ -214,6 +219,10 @@
       <div class="form-group">
         <label>City</label>
         <input type="text" id="city" placeholder="Pune"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="phone" placeholder="e.g. 9876543210"/>
       </div>
     </div>
 
@@ -268,6 +277,7 @@
     selectedRole = role;
     document.getElementById('donorBtn').classList.toggle('active', role === 'DONOR');
     document.getElementById('ngoBtn').classList.toggle('active', role === 'NGO');
+    document.getElementById('volunteerBtn').classList.toggle('active', role === 'VOLUNTEER');
   }
 
   async function handleRegister() 
@@ -318,7 +328,11 @@
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, city, email, password, role: selectedRole })
+        body: JSON.stringify({ 
+          name, city, email, password, 
+          role: selectedRole,
+          phone: document.getElementById('phone').value 
+        })
       });
 
       const text = await res.text();

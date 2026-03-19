@@ -28,6 +28,7 @@ public class User {
     private Role role;
 
     private String city;
+    private String phone;
     private String address;
     private Double latitude;
     private Double longitude;

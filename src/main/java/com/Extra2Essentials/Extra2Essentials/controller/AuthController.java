@@ -32,6 +32,7 @@ public class AuthController {
                 .password(passwordEncoder.encode(body.get("password")))
                 .role(Role.valueOf(body.get("role").toUpperCase()))
                 .city(body.get("city"))
+                .phone(body.get("phone"))  // ← ADD THIS
                 .build();
         userRepository.save(user);
         return ResponseEntity.ok("Registered successfully");
