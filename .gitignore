@@ -1,7 +1,9 @@
 target/
+*.log
 app.log
+app:log
 *.class
-.mvn/
-!.mvn/wrapper/
 .env
 *.jar
+HELP.md
+.mvn/wrapper/maven-wrapper.jar
