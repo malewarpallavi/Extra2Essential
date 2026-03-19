@@ -158,29 +158,211 @@
     btn.href = role === 'DONOR' ? 'donor-dashboard.html' : 'ngo-dashboard.html';
   }
 
-  // City coordinates for Maharashtra + major cities
+  
   const cityCoords = {
-    'pune': [18.5204, 73.8567], 'mumbai': [19.0760, 72.8777],
-    'nagpur': [21.1458, 79.0882], 'nashik': [20.0000, 73.7898],
-    'aurangabad': [19.8762, 75.3433], 'solapur': [17.6868, 75.9062],
-    'kolhapur': [16.7050, 74.2433], 'thane': [19.2183, 72.9781],
-    'delhi': [28.6139, 77.2090], 'bangalore': [12.9716, 77.5946],
-    'hyderabad': [17.3850, 78.4867], 'chennai': [13.0827, 80.2707],
-    'kolkata': [22.5726, 88.3639], 'ahmedabad': [23.0225, 72.5714],
-    'jaipur': [26.9124, 75.7873], 'lucknow': [26.8467, 80.9462],
-    'default': [18.5204, 73.8567]
+    // ── MAHARASHTRA – All 36 Districts ──────────────────
+    // Konkan Division
+    'mumbai': [19.0760, 72.8777],
+    'navi mumbai': [19.0330, 73.0297],
+    'thane': [19.2183, 72.9781],
+    'kalyan': [19.2437, 73.1355],
+    'dombivli': [19.2183, 73.0865],
+    'ulhasnagar': [19.2183, 73.1530],
+    'mira road': [19.2812, 72.8726],
+    'vasai': [19.3919, 72.8397],
+    'virar': [19.4597, 72.8117],
+    'raigad': [18.5158, 73.1776],
+    'alibag': [18.6414, 72.8722],
+    'panvel': [18.9894, 73.1175],
+    'ratnagiri': [16.9902, 73.3120],
+    'sindhudurg': [16.3492, 73.5667],
+    'kudal': [16.0136, 73.6852],
+    'palghar': [19.6967, 72.7650],
+    'boisar': [19.8000, 72.7667],
+    // Pune Division
+    'pune': [18.5204, 73.8567],
+    'pimpri': [18.6279, 73.7997],
+    'chinchwad': [18.6279, 73.7997],
+    'pimpri chinchwad': [18.6279, 73.7997],
+    'solapur': [17.6868, 75.9062],
+    'satara': [17.6805, 74.0183],
+    'sangli': [16.8524, 74.5815],
+    'miraj': [16.8240, 74.6451],
+    'kolhapur': [16.7050, 74.2433],
+    'ichalkaranji': [16.6930, 74.4615],
+    'nashik': [19.9975, 73.7898],
+    'malegaon': [20.5579, 74.5089],
+    'ahmednagar': [19.0948, 74.7480],
+    'baramati': [18.1517, 74.5822],
+    'shirdi': [19.7659, 74.4773],
+    // Aurangabad / Chhatrapati Sambhajinagar Division
+    'aurangabad': [19.8762, 75.3433],
+    'chhatrapati sambhajinagar': [19.8762, 75.3433],
+    'jalna': [19.8347, 75.8816],
+    'beed': [18.9890, 75.7602],
+    'osmanabad': [18.1860, 76.0434],
+    'dharashiv': [18.1860, 76.0434],
+    'latur': [18.4088, 76.5604],
+    'nanded': [19.1383, 77.3210],
+    'hingoli': [19.7177, 77.1500],
+    'parbhani': [19.2704, 76.7749],
+    // Amravati Division
+    'amravati': [20.9320, 77.7523],
+    'akola': [20.7002, 77.0082],
+    'washim': [20.1114, 77.1322],
+    'buldhana': [20.5292, 76.1842],
+    'yavatmal': [20.3888, 78.1204],
+    // Nagpur Division
+    'nagpur': [21.1458, 79.0882],
+    'wardha': [20.7453, 78.6022],
+    'chandrapur': [19.9615, 79.2961],
+    'gadchiroli': [20.1809, 80.0000],
+    'gondia': [21.4628, 80.1946],
+    'bhandara': [21.1667, 79.6500],
+    // Nashik Division extra
+    'dhule': [20.9042, 74.7749],
+    'nandurbar': [21.3667, 74.2333],
+    'jalgaon': [21.0077, 75.5626],
+    // Other Maharashtra cities
+    'badlapur': [19.1504, 73.2637],
+    'ambernath': [19.1974, 73.1896],
+    'bhiwandi': [19.2988, 73.0634],
+    'wai': [17.9543, 73.8967],
+    'karad': [17.2880, 74.1830],
+    'pandharpur': [17.6805, 75.3280],
+    'barshi': [18.2333, 75.6920],
+    'kopargaon': [19.8833, 74.4833],
+    'ahmednagar': [19.0948, 74.7480],
+    'shegaon': [20.7952, 76.6980],
+    'khamgaon': [20.7090, 76.5690],
+    'akot': [21.0980, 77.0570],
+    'morshi': [21.3333, 78.0000],
+    'daryapur': [20.9167, 77.3333],
+    'pusad': [19.9100, 77.5800],
+    'wani': [20.0580, 78.9530],
+    'narkhed': [21.4490, 78.5780],
+    'kamthi': [21.2167, 79.2000],
+    'hinganghat': [20.5500, 78.8333],
+    'warda': [20.7453, 78.6022],
+    'arvi': [20.9833, 78.2333],
+    'deoli': [20.6333, 78.4667],
+    'umred': [20.8500, 79.3167],
+    'saoner': [21.3833, 78.9167],
+    'katol': [21.2667, 78.5833],
+    'nile': [21.3167, 78.3667],
+    'ramtek': [21.3937, 79.3280],
+    'tumsar': [21.3833, 79.7333],
+    'tirora': [21.4000, 80.0667],
+    'desaiganj': [20.7000, 79.9667],
+    'mul': [20.0667, 79.6667],
+    'rajura': [19.7833, 79.3667],
+    'ballarpur': [19.8667, 79.3333],
+    'warora': [20.2333, 79.0000],
+    'chimur': [20.4833, 79.2833],
+    'bhadravati': [20.0000, 79.1500],
+    'nagbhid': [20.5667, 79.9167],
+  
+    // ── OTHER MAJOR INDIAN CITIES ────────────────────────
+    // Delhi NCR
+    'delhi': [28.6139, 77.2090],
+    'new delhi': [28.6139, 77.2090],
+    'noida': [28.5355, 77.3910],
+    'gurgaon': [28.4595, 77.0266],
+    'gurugram': [28.4595, 77.0266],
+    'faridabad': [28.4089, 77.3178],
+    'ghaziabad': [28.6692, 77.4538],
+    // Karnataka
+    'bangalore': [12.9716, 77.5946],
+    'bengaluru': [12.9716, 77.5946],
+    'mysore': [12.2958, 76.6394],
+    'mysuru': [12.2958, 76.6394],
+    'hubli': [15.3647, 75.1240],
+    'mangalore': [12.9141, 74.8560],
+    // Tamil Nadu
+    'chennai': [13.0827, 80.2707],
+    'coimbatore': [11.0168, 76.9558],
+    'madurai': [9.9252, 78.1198],
+    'salem': [11.6643, 78.1460],
+    // Telangana / AP
+    'hyderabad': [17.3850, 78.4867],
+    'secunderabad': [17.4399, 78.4983],
+    'warangal': [17.9784, 79.5941],
+    'vijayawada': [16.5062, 80.6480],
+    'visakhapatnam': [17.6868, 83.2185],
+    'vizag': [17.6868, 83.2185],
+    // West Bengal
+    'kolkata': [22.5726, 88.3639],
+    'howrah': [22.5958, 88.2636],
+    'durgapur': [23.5204, 87.3119],
+    // Gujarat
+    'ahmedabad': [23.0225, 72.5714],
+    'surat': [21.1702, 72.8311],
+    'vadodara': [22.3072, 73.1812],
+    'rajkot': [22.3039, 70.8022],
+    // Rajasthan
+    'jaipur': [26.9124, 75.7873],
+    'jodhpur': [26.2389, 73.0243],
+    'udaipur': [24.5854, 73.7125],
+    'kota': [25.2138, 75.8648],
+    // Madhya Pradesh
+    'bhopal': [23.2599, 77.4126],
+    'indore': [22.7196, 75.8577],
+    'gwalior': [26.2183, 78.1828],
+    'jabalpur': [23.1815, 79.9864],
+    // Uttar Pradesh
+    'lucknow': [26.8467, 80.9462],
+    'kanpur': [26.4499, 80.3319],
+    'agra': [27.1767, 78.0081],
+    'varanasi': [25.3176, 82.9739],
+    'prayagraj': [25.4358, 81.8463],
+    'allahabad': [25.4358, 81.8463],
+    'meerut': [28.9845, 77.7064],
+    'vrindavan': [27.5794, 77.6964],
+    'mathura': [27.4924, 77.6737],
+    // Bihar
+    'patna': [25.5941, 85.1376],
+    'gaya': [24.7955, 85.0002],
+    // Jharkhand
+    'ranchi': [23.3441, 85.3096],
+    'jamshedpur': [22.8046, 86.2029],
+    // Odisha
+    'bhubaneswar': [20.2961, 85.8245],
+    'cuttack': [20.4625, 85.8828],
+    // Punjab / Haryana
+    'chandigarh': [30.7333, 76.7794],
+    'ludhiana': [30.9010, 75.8573],
+    'amritsar': [31.6340, 74.8723],
+    'jalandhar': [31.3260, 75.5762],
+    // Himachal / Uttarakhand
+    'shimla': [31.1048, 77.1734],
+    'dehradun': [30.3165, 78.0322],
+    'haridwar': [29.9457, 78.1642],
+    // Kerala
+    'kochi': [9.9312, 76.2673],
+    'thiruvananthapuram': [8.5241, 76.9366],
+    'kozhikode': [11.2588, 75.7804],
+    // Assam / NE
+    'guwahati': [26.1445, 91.7362],
+    // Chhattisgarh
+    'raipur': [21.2514, 81.6296],
+    // Default — Center of India
+    'default': [20.5937, 78.9629]
   };
+ 
 
-  function getCoords(donation) 
-  {
-    // Use exact coordinates if available
-    if (donation.latitude && donation.longitude) 
-    {
+
+  function getCoords(donation) {
+    if (donation.latitude && donation.longitude) {
       return [donation.latitude, donation.longitude];
     }
-    // Fall back to city name
     const key = donation.city?.toLowerCase().trim();
-    return cityCoords[key] || cityCoords.default;
+    if (cityCoords[key]) return cityCoords[key];
+    
+    // Try partial match
+    const partial = Object.keys(cityCoords).find(k => 
+      key && (key.includes(k) || k.includes(key))
+    );
+    return partial ? cityCoords[partial] : cityCoords.default;
   }
 
   const catEmoji = { FOOD: '🍱', CLOTHES: '👗', BOOKS: '📚', OTHER: '📦' };
@@ -202,7 +384,7 @@
   }
 
   // Init map
-  const map = L.map('map', { zoomControl: true }).setView([18.5204, 73.8567], 6);
+const map = L.map('map', { zoomControl: true }).setView([20.5937, 78.9629], 5);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors', maxZoom: 18
   }).addTo(map);

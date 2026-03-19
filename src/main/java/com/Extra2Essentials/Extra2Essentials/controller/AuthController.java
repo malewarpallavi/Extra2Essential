@@ -5,6 +5,7 @@ import com.Extra2Essentials.Extra2Essentials.repository.UserRepository;
 import com.Extra2Essentials.Extra2Essentials.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 

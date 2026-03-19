@@ -7,6 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.Extra2Essentials.Extra2Essentials.model.Role;
+import com.Extra2Essentials.Extra2Essentials.repository.UserRepository;
+import java.util.List;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +62,27 @@ public class DonationController {
     @GetMapping("/city/{city}")
     public ResponseEntity<List<Donation>> getDonationsByCity(@PathVariable String city) {
         return ResponseEntity.ok(donationRepository.findByCityAndStatus(city, DonationStatus.AVAILABLE));
+    }
+
+    @GetMapping("/stats")
+    @CrossOrigin(origins = "*")
+    public ResponseEntity<?> getStats() {
+        List<Donation> all = donationRepository.findAll();
+        long total = all.size();
+        long claimed = all.stream().filter(d -> 
+            d.getStatus() == DonationStatus.CLAIMED || 
+            d.getStatus() == DonationStatus.DELIVERED).count();
+        long cities = all.stream().map(Donation::getCity)
+            .filter(c -> c != null).distinct().count();
+        long ngos = userRepository.countByRole(Role.NGO);
+
+        return ResponseEntity.ok(Map.of(
+            "total", total,
+            "claimed", claimed,
+            "cities", cities,
+            "ngos", ngos,
+            "impact", claimed * 5
+        ));
     }
 
     // NGO claims a donation
