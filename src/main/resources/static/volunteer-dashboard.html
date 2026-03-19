@@ -125,7 +125,6 @@
 const token = localStorage.getItem('token');
 const name = localStorage.getItem('name') || 'Volunteer';
 const role = localStorage.getItem('role');
-
 if (!token || role !== 'VOLUNTEER') window.location.href = 'login.html';
 
 document.getElementById('welcomeName').textContent = name;
@@ -165,27 +164,43 @@ function renderCard(d) {
       </div>
       ${d.status === 'AVAILABLE'
         ? `<button class="btn-volunteer" onclick="claimTask(${d.id}, this)">🙋 Volunteer for Pickup</button>`
-        : `<div style="padding:0.6rem;background:var(--green-pale);color:var(--green);border-radius:8px;text-align:center;font-weight:600;font-size:0.88rem">✅ ${d.status}</div>`
-      }
-      ${waLink ? `<a class="btn-wa" href="${waLink}" target="_blank">💬 WhatsApp Donor</a>` : ''}
+        : `<div style="padding:0.7rem;background:var(--green-pale);border-radius:8px;font-size:0.88rem;color:var(--green);margin-bottom:0.5rem">
+            ✅ ${d.status}
+            </div>
+            <div style="padding:0.7rem;background:#fff3e0;border-radius:8px;font-size:0.88rem;color:var(--earth)">
+            📞 Donor: <strong>${d.donor?.name}</strong><br>
+            📱 Phone: <strong>${d.donor?.phone || 'Not provided'}</strong><br>
+            📍 Address: <strong>${d.donor?.address || d.city}</strong>
+            </div>`
+        }
     </div>`;
 }
 
 async function loadDonations(elId) {
   const el = document.getElementById(elId);
+  if (!el) { console.log('Element not found:', elId); return; }
+  
   try {
-    const res = await fetch('/api/donations', { headers:{'Authorization':'Bearer '+token} });
+    const res = await fetch('/api/donations', { 
+      headers: { 'Authorization': 'Bearer ' + token } 
+    });
     const donations = await res.json();
+    console.log('Donations received:', donations.length);
+    
     const available = donations.filter(d => d.status === 'AVAILABLE');
+    console.log('Available:', available.length);
+    
     document.getElementById('statAvail').textContent = available.length;
     document.getElementById('statPoints').textContent = available.length * 5;
-    if(available.length === 0) {
+    
+    if (available.length === 0) {
       el.innerHTML = `<div class="empty-state"><span class="empty-icon">📦</span><p>No available donations right now.</p></div>`;
     } else {
       el.innerHTML = available.map(renderCard).join('');
     }
   } catch(e) {
-    el.innerHTML = `<div class="empty-state"><span class="empty-icon">❌</span><p>Failed to load.</p></div>`;
+    console.log('Error:', e);
+    el.innerHTML = `<div class="empty-state"><span class="empty-icon">❌</span><p>Failed to load: ${e.message}</p></div>`;
   }
 }
 

@@ -1,5 +1,6 @@
 package com.Extra2Essentials.Extra2Essentials.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,13 +16,14 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @JsonIgnore
     private String resetToken;
 
     private String name;
 
     @Column(unique = true)
     private String email;
-
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)

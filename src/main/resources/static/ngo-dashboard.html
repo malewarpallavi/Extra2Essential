@@ -353,15 +353,12 @@
         </div>
         ${isClaimed
           ? `<div class="btn-claimed">✅ Already Claimed</div>
-            ${waLink ? `<a href="${waLink}" target="_blank" 
-              style="display:block;text-align:center;margin-top:0.5rem;padding:0.5rem;
-              background:#25D366;color:#fff;border-radius:8px;text-decoration:none;
-              font-size:0.85rem;font-weight:600">
-              💬 Contact on WhatsApp
-            </a>` : ''}`
-          : `<button class="btn-claim" onclick="claimDonation(${d.id}, this)">
-              Claim This Donation →
-            </button>`
+            ${d.claimedBy ? `
+            <div style="margin-top:0.5rem;padding:0.7rem;background:var(--green-pale);border-radius:8px;font-size:0.88rem;color:var(--green)">
+              📞 Donor Contact: <strong>${d.donor?.phone || 'Not provided'}</strong><br>
+              📍 Address: <strong>${d.donor?.address || d.city}</strong>
+            </div>` : ''}` 
+          : `<button class="btn-claim" onclick="claimDonation(${d.id}, this)">Claim This Donation →</button>`
         }
       </div>`;
   }
