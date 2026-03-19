@@ -22,23 +22,31 @@ public class DonationController {
 
     // Donor creates a donation
     @PostMapping
-    public ResponseEntity<?> createDonation(@RequestBody Map<String, String> body,
-                                             Authentication auth) {
-        User donor = userRepository.findByEmail(auth.getName()).orElseThrow();
+        public ResponseEntity<?> createDonation(@RequestBody Map<String, String> body,
+                                                Authentication auth) {
+            User donor = userRepository.findByEmail(auth.getName()).orElseThrow();
 
-        Donation donation = Donation.builder()
-                .donor(donor)
-                .title(body.get("title"))
-                .category(Category.valueOf(body.get("category").toUpperCase()))
-                .quantity(Integer.parseInt(body.get("quantity")))
-                .city(body.get("city"))
-                .pickupDate(LocalDate.parse(body.get("pickupDate")))
-                .status(DonationStatus.AVAILABLE)
-                .build();
+            Donation donation = Donation.builder()
+                    .donor(donor)
+                    .title(body.get("title"))
+                    .category(Category.valueOf(body.get("category").toUpperCase()))
+                    .quantity(Integer.parseInt(body.get("quantity")))
+                    .city(body.get("city"))
+                    .pickupDate(LocalDate.parse(body.get("pickupDate")))
+                    .status(DonationStatus.AVAILABLE)
+                    .build();
 
-        donationRepository.save(donation);
-        return ResponseEntity.ok("Donation created successfully");
-    }
+            // Save address and coordinates if provided
+            if (body.get("address") != null) 
+                donation.setAddress(body.get("address"));
+            if (body.get("latitude") != null && !body.get("latitude").isEmpty()) 
+                donation.setLatitude(Double.parseDouble(body.get("latitude")));
+            if (body.get("longitude") != null && !body.get("longitude").isEmpty()) 
+                donation.setLongitude(Double.parseDouble(body.get("longitude")));
+
+            donationRepository.save(donation);
+            return ResponseEntity.ok("Donation created successfully");
+        }
 
     // Get all available donations
     @GetMapping

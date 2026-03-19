@@ -28,6 +28,9 @@ public class Donation {
 
     private int quantity;
     private String city;
+    private String address;
+    private Double latitude;
+    private Double longitude;
     private LocalDate pickupDate;
 
     @Enumerated(EnumType.STRING)

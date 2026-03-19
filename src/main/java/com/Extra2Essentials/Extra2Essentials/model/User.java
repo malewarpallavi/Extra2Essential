@@ -1,5 +1,6 @@
 package com.Extra2Essentials.Extra2Essentials.model;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +15,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String resetToken;
 
     private String name;
 
@@ -26,6 +28,9 @@ public class User {
     private Role role;
 
     private String city;
+    private String address;
+    private Double latitude;
+    private Double longitude;
 
     private boolean verified = false;
 }

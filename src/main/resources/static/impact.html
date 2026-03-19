@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Impact Dashboard — Extra2Essential</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1a7c4f; --green-light: #22a86a; --green-pale: #e8f7ef;
+      --earth: #c8702a; --earth-light: #f0a865;
+      --blue: #1565c0; --blue-pale: #e3f2fd;
+      --cream: #faf7f2; --dark: #141a12;
+      --mid: #3a4a35; --text: #2d3a28; --muted: #7a8c73;
+      --white: #ffffff; --border: #e2ede8;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: #f0f4f1; color: var(--text); min-height: 100vh; }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem; background: var(--dark);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--white); text-decoration: none; }
+    .nav-logo span { color: var(--earth-light); }
+    .nav-links { display: flex; gap: 0.8rem; align-items: center; }
+    .nav-link { padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; transition: all 0.2s; color: rgba(255,255,255,0.6); }
+    .nav-link:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+    .nav-link.active { background: var(--green); color: var(--white); }
+
+    /* PAGE */
+    .page { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2rem; color: var(--dark); }
+    .page-header p { color: var(--muted); margin-top: 0.3rem; }
+
+    /* BIG STATS */
+    .big-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.2rem; margin-bottom: 2rem; }
+    .big-stat {
+      background: var(--white); border-radius: 20px; padding: 1.5rem;
+      border: 1px solid var(--border); text-align: center;
+      transition: transform 0.2s; position: relative; overflow: hidden;
+    }
+    .big-stat:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
+    .big-stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+    .big-stat.s1::before { background: var(--green); }
+    .big-stat.s2::before { background: var(--earth); }
+    .big-stat.s3::before { background: var(--blue); }
+    .big-stat.s4::before { background: #8b5cf6; }
+    .big-stat-icon { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+    .big-stat-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.4rem; color: var(--dark); }
+    .big-stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 0.3rem; }
+    .big-stat-change { font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem; padding: 0.2rem 0.6rem; border-radius: 50px; display: inline-block; }
+    .change-up { background: var(--green-pale); color: var(--green); }
+
+    /* CHARTS GRID */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .chart-card { background: var(--white); border-radius: 20px; padding: 1.5rem; border: 1px solid var(--border); }
+    .chart-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+    .chart-card-header h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); }
+    .chart-card-header span { font-size: 0.8rem; color: var(--muted); }
+    .chart-wrap { position: relative; height: 220px; }
+
+    /* FULL WIDTH CHART */
+    .chart-card.full { grid-column: 1 / -1; }
+    .chart-card.full .chart-wrap { height: 260px; }
+
+    /* IMPACT TABLE */
+    .impact-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    .impact-table th { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 0.5rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .impact-table td { padding: 0.7rem 0.8rem; font-size: 0.88rem; border-bottom: 1px solid #f5f5f5; }
+    .impact-table tr:last-child td { border-bottom: none; }
+    .impact-table tr:hover td { background: #fafafa; }
+    .table-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 50px; font-size: 0.72rem; font-weight: 600; }
+
+    /* LIVE FEED */
+    .live-feed { background: var(--white); border-radius: 20px; padding: 1.5rem; border: 1px solid var(--border); margin-bottom: 1.5rem; }
+    .live-feed h3 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green-light); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+    .feed-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem 0; border-bottom: 1px solid #f5f5f5; }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .feed-text { flex: 1; font-size: 0.85rem; color: var(--text); }
+    .feed-text strong { color: var(--dark); }
+    .feed-time { font-size: 0.75rem; color: var(--muted); }
+
+    @media (max-width: 900px) {
+      .big-stats { grid-template-columns: repeat(2,1fr); }
+      .charts-grid { grid-template-columns: 1fr; }
+      .chart-card.full { grid-column: 1; }
+      .page { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">Extra2<span>Essential</span></a>
+  <div class="nav-links">
+    <a href="map.html" class="nav-link">🗺️ Live Map</a>
+    <a href="impact.html" class="nav-link active">📊 Impact</a>
+    <a href="donor-dashboard.html" class="nav-link">Dashboard</a>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+  <div class="page-header">
+    <h1>📊 Impact Dashboard</h1>
+    <p>Real-time statistics on resource redistribution across India</p>
+  </div>
+
+  <!-- BIG STATS -->
+  <div class="big-stats">
+    <div class="big-stat s1">
+      <span class="big-stat-icon">📦</span>
+      <div class="big-stat-val" id="statTotal">0</div>
+      <div class="big-stat-label">Total Donations</div>
+      <span class="big-stat-change change-up">↑ Growing</span>
+    </div>
+    <div class="big-stat s2">
+      <span class="big-stat-icon">✅</span>
+      <div class="big-stat-val" id="statClaimed">0</div>
+      <div class="big-stat-label">Items Claimed</div>
+      <span class="big-stat-change change-up">↑ Active</span>
+    </div>
+    <div class="big-stat s3">
+      <span class="big-stat-icon">🏙️</span>
+      <div class="big-stat-val" id="statCities">0</div>
+      <div class="big-stat-label">Cities Covered</div>
+      <span class="big-stat-change change-up">↑ Expanding</span>
+    </div>
+    <div class="big-stat s4">
+      <span class="big-stat-icon">👥</span>
+      <div class="big-stat-val" id="statImpact">0</div>
+      <div class="big-stat-label">Lives Impacted</div>
+      <span class="big-stat-change change-up">↑ Rising</span>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+
+    <!-- Category Pie -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3>Donations by Category</h3>
+        <span id="totalLabel">0 total</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Status Doughnut -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <h3>Donation Status</h3>
+        <span>Current snapshot</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+
+    <!-- City Bar Chart - Full Width -->
+    <div class="chart-card full">
+      <div class="chart-card-header">
+        <h3>Donations by City</h3>
+        <span>Top cities</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="cityChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LIVE FEED -->
+  <div class="live-feed">
+    <h3><span class="live-dot"></span> Live Activity Feed</h3>
+    <div id="liveFeed"></div>
+  </div>
+
+  <!-- IMPACT TABLE -->
+  <div class="chart-card" style="margin-bottom:2rem">
+    <div class="chart-card-header">
+      <h3>Category Impact Breakdown</h3>
+      <span>Detailed stats</span>
+    </div>
+    <table class="impact-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Total</th>
+          <th>Available</th>
+          <th>Claimed</th>
+          <th>Claim Rate</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="impactTableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  const token = localStorage.getItem('token');
+
+  // Chart defaults
+  Chart.defaults.font.family = 'DM Sans';
+  Chart.defaults.color = '#7a8c73';
+
+  let categoryChart, statusChart, cityChart;
+
+  const catEmoji = { FOOD: '🍱', CLOTHES: '👗', BOOKS: '📚', OTHER: '📦' };
+  const catColors = {
+    FOOD: ['#e65100','#ff8f00','#ffcc80'],
+    CLOTHES: ['#1b5e20','#2e7d32','#81c784'],
+    BOOKS: ['#0d47a1','#1565c0','#90caf9'],
+    OTHER: ['#4a148c','#6a1b9a','#ce93d8']
+  };
+
+  function initCharts() {
+    // Category Pie
+    categoryChart = new Chart(document.getElementById('categoryChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Food 🍱', 'Clothes 👗', 'Books 📚', 'Other 📦'],
+        datasets: [{
+          data: [0, 0, 0, 0],
+          backgroundColor: ['#e65100','#2e7d32','#1565c0','#6a1b9a'],
+          borderWidth: 3, borderColor: '#fff',
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { padding: 16, font: { size: 12 } } }
+        },
+        cutout: '60%'
+      }
+    });
+
+    // Status Doughnut
+    statusChart = new Chart(document.getElementById('statusChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Available ✅', 'Claimed 🤝', 'Delivered 🚚'],
+        datasets: [{
+          data: [0, 0, 0],
+          backgroundColor: ['#22a86a','#c8702a','#1565c0'],
+          borderWidth: 3, borderColor: '#fff',
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { padding: 16, font: { size: 12 } } }
+        },
+        cutout: '60%'
+      }
+    });
+
+    // City Bar
+    cityChart = new Chart(document.getElementById('cityChart'), {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Donations',
+          data: [],
+          backgroundColor: 'rgba(26,124,79,0.8)',
+          borderColor: '#1a7c4f',
+          borderWidth: 2, borderRadius: 8,
+          hoverBackgroundColor: '#22a86a'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f0f0f0' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function updateCharts(donations) {
+    // Category counts
+    const catCount = { FOOD: 0, CLOTHES: 0, BOOKS: 0, OTHER: 0 };
+    const statusCount = { AVAILABLE: 0, CLAIMED: 0, DELIVERED: 0 };
+    const cityCount = {};
+
+    donations.forEach(d => {
+      if (catCount[d.category] !== undefined) catCount[d.category]++;
+      if (statusCount[d.status] !== undefined) statusCount[d.status]++;
+      const city = d.city || 'Unknown';
+      cityCount[city] = (cityCount[city] || 0) + 1;
+    });
+
+    // Update category chart
+    categoryChart.data.datasets[0].data = Object.values(catCount);
+    categoryChart.update();
+
+    // Update status chart
+    statusChart.data.datasets[0].data = Object.values(statusCount);
+    statusChart.update();
+
+    // Update city chart (top 8)
+    const sortedCities = Object.entries(cityCount).sort((a,b) => b[1]-a[1]).slice(0,8);
+    cityChart.data.labels = sortedCities.map(([city]) => city);
+    cityChart.data.datasets[0].data = sortedCities.map(([,count]) => count);
+    cityChart.update();
+
+    // Update big stats
+    const total = donations.length;
+    const claimed = statusCount.CLAIMED + statusCount.DELIVERED;
+    const cities = Object.keys(cityCount).length;
+    const impact = claimed * 5;
+
+    animateCounter('statTotal', total);
+    animateCounter('statClaimed', claimed);
+    animateCounter('statCities', cities);
+    animateCounter('statImpact', impact);
+
+    document.getElementById('totalLabel').textContent = total + ' total';
+
+    // Update impact table
+    const tbody = document.getElementById('impactTableBody');
+    tbody.innerHTML = Object.entries(catCount).map(([cat, total]) => {
+      const avail = donations.filter(d => d.category === cat && d.status === 'AVAILABLE').length;
+      const cl = donations.filter(d => d.category === cat && d.status !== 'AVAILABLE').length;
+      const rate = total > 0 ? Math.round((cl/total)*100) : 0;
+      const color = rate > 70 ? 'var(--green)' : rate > 40 ? 'var(--earth)' : '#999';
+      return `<tr>
+        <td><strong>${catEmoji[cat]} ${cat}</strong></td>
+        <td>${total}</td>
+        <td><span class="table-badge" style="background:var(--green-pale);color:var(--green)">${avail}</span></td>
+        <td><span class="table-badge" style="background:#fff3e0;color:var(--earth)">${cl}</span></td>
+        <td><strong style="color:${color}">${rate}%</strong></td>
+        <td><span class="table-badge" style="background:${rate>50?'var(--green-pale)':'#f5f5f5'};color:${rate>50?'var(--green)':'#999'}">${rate>50?'Active':'Low'}</span></td>
+      </tr>`;
+    }).join('');
+
+    // Live feed
+    updateFeed(donations);
+  }
+
+  function updateFeed(donations) {
+    const el = document.getElementById('liveFeed');
+    const recent = donations.slice(-5).reverse();
+    if (recent.length === 0) {
+      el.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No activity yet.</p>';
+      return;
+    }
+    el.innerHTML = recent.map(d => `
+      <div class="feed-item">
+        <div class="feed-icon cat-${d.category}" style="background:${d.category==='FOOD'?'#fff3e0':d.category==='CLOTHES'?'#e8f5e9':d.category==='BOOKS'?'#e3f2fd':'#f3e5f5'}">${catEmoji[d.category]||'📦'}</div>
+        <div class="feed-text">
+          <strong>${d.donor?.name || 'Someone'}</strong> donated <strong>${d.title}</strong>
+          <div style="font-size:0.78rem;color:var(--muted)">📍 ${d.city} · ${d.quantity} items</div>
+        </div>
+        <span class="feed-time">${d.status === 'AVAILABLE' ? '🟢 Live' : '✅ Claimed'}</span>
+      </div>`).join('');
+  }
+
+  function animateCounter(id, target) {
+    const el = document.getElementById(id);
+    const duration = 1200;
+    const step = target / (duration / 16);
+    let current = 0;
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= target) { current = target; clearInterval(timer); }
+      el.textContent = Math.floor(current).toLocaleString();
+    }, 16);
+  }
+
+  async function loadData() {
+    try {
+      const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+      const res = await fetch('/api/donations', { headers });
+      const donations = await res.json();
+      updateCharts(donations);
+    } catch (e) {
+      // Demo data fallback
+      const demo = [
+        { title:'Winter Clothes', category:'CLOTHES', quantity:30, city:'Pune', status:'AVAILABLE', donor:{name:'Pallavi'} },
+        { title:'School Books', category:'BOOKS', quantity:20, city:'Nashik', status:'CLAIMED', donor:{name:'Rahul'} },
+        { title:'Food Packets', category:'FOOD', quantity:50, city:'Nagpur', status:'CLAIMED', donor:{name:'Priya'} },
+        { title:'Household Items', category:'OTHER', quantity:15, city:'Mumbai', status:'AVAILABLE', donor:{name:'Amit'} },
+        { title:'Rice Bags', category:'FOOD', quantity:40, city:'Pune', status:'AVAILABLE', donor:{name:'Sneha'} },
+        { title:'Kids Clothes', category:'CLOTHES', quantity:25, city:'Nagpur', status:'DELIVERED', donor:{name:'Raj'} },
+      ];
+      updateCharts(demo);
+    }
+  }
+
+  initCharts();
+  loadData();
+
+  // Auto refresh every 30 seconds
+  setInterval(loadData, 30000);
+</script>
+</body>
+</html>

@@ -48,4 +48,36 @@ public class AuthController {
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("error", "Invalid credentials")));
     }
+
+    // Get my profile (includes saved address)
+    @GetMapping("/profile")
+    public ResponseEntity<?> getProfile(Authentication auth) {
+        return userRepository.findByEmail(auth.getName())
+                .map(u -> ResponseEntity.ok(Map.of(
+                    "name", u.getName(),
+                    "email", u.getEmail(),
+                    "city", u.getCity() != null ? u.getCity() : "",
+                    "address", u.getAddress() != null ? u.getAddress() : "",
+                    "latitude", u.getLatitude() != null ? u.getLatitude() : "",
+                    "longitude", u.getLongitude() != null ? u.getLongitude() : "",
+                    "role", u.getRole().name()
+                )))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Update profile address
+    @PutMapping("/profile/address")
+    public ResponseEntity<?> updateAddress(@RequestBody Map<String, String> body,
+                                            Authentication auth) {
+        return userRepository.findByEmail(auth.getName()).map(u -> {
+            if (body.get("address") != null) u.setAddress(body.get("address"));
+            if (body.get("city") != null) u.setCity(body.get("city"));
+            if (body.get("latitude") != null && !body.get("latitude").isEmpty())
+                u.setLatitude(Double.parseDouble(body.get("latitude")));
+            if (body.get("longitude") != null && !body.get("longitude").isEmpty())
+                u.setLongitude(Double.parseDouble(body.get("longitude")));
+            userRepository.save(u);
+            return ResponseEntity.ok("Address saved successfully");
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

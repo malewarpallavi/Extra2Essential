@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — Extra2Essential</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1a7c4f; --green-light: #22a86a; --green-pale: #e8f7ef;
+      --earth: #c8702a; --earth-light: #f0a865;
+      --cream: #faf7f2; --dark: #141a12;
+      --mid: #3a4a35; --text: #2d3a28; --muted: #7a8c73;
+      --white: #ffffff; --error: #e53e3e; --border: #e2ede8;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream); color: var(--text);
+      min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+    }
+
+    /* LEFT PANEL */
+    .left-panel {
+      background: var(--dark);
+      display: flex; flex-direction: column;
+      justify-content: space-between; padding: 3rem;
+      position: relative; overflow: hidden;
+    }
+    .left-panel::before {
+      content: '';
+      position: absolute; top: -150px; right: -150px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(34,168,106,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .left-panel::after {
+      content: '';
+      position: absolute; bottom: -100px; left: -100px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(200,112,42,0.1) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    .panel-logo {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 1.5rem; color: var(--white); text-decoration: none;
+    }
+    .panel-logo span { color: var(--earth-light); }
+
+    .panel-content { position: relative; z-index: 1; }
+    .panel-content h2 {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 2.2rem; color: var(--white);
+      line-height: 1.25; margin-bottom: 1rem;
+    }
+    .panel-content h2 span { color: var(--green-light); }
+    .panel-content p { color: rgba(255,255,255,0.5); font-size: 1rem; line-height: 1.7; margin-bottom: 2rem; }
+
+    .role-cards { display: flex; flex-direction: column; gap: 1rem; position: relative; z-index: 1; }
+    .role-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 1.2rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .role-card-icon { font-size: 1.8rem; }
+    .role-card-text strong { display: block; color: var(--white); font-size: 0.95rem; font-weight: 600; }
+    .role-card-text span { color: rgba(255,255,255,0.4); font-size: 0.82rem; }
+
+    .panel-footer { color: rgba(255,255,255,0.3); font-size: 0.82rem; position: relative; z-index: 1; }
+
+    /* RIGHT PANEL */
+    .right-panel {
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 2rem; overflow-y: auto;
+    }
+    .form-box { width: 100%; max-width: 440px; }
+    .form-box h1 {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: 2rem; color: var(--dark); margin-bottom: 0.4rem;
+    }
+    .form-box .subtitle {
+      color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem;
+    }
+    .form-box .subtitle a { color: var(--green); text-decoration: none; font-weight: 500; }
+
+    /* ROLE SELECTOR */
+    .role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1.5rem; }
+    .role-btn {
+      padding: 0.9rem; border: 2px solid var(--border);
+      border-radius: 14px; background: var(--white);
+      cursor: pointer; text-align: center;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    }
+    .role-btn .role-emoji { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
+    .role-btn .role-name { font-size: 0.88rem; font-weight: 600; color: var(--mid); display: block; }
+    .role-btn .role-desc { font-size: 0.75rem; color: var(--muted); display: block; margin-top: 0.2rem; }
+    .role-btn.active {
+      border-color: var(--green); background: var(--green-pale);
+    }
+    .role-btn.active .role-name { color: var(--green); }
+
+    .form-group { margin-bottom: 1.1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .form-group label {
+      display: block; font-size: 0.85rem; font-weight: 600;
+      color: var(--mid); margin-bottom: 0.45rem;
+    }
+    .form-group input, .form-group select {
+      width: 100%; padding: 0.82rem 1rem;
+      border: 1.5px solid var(--border); border-radius: 12px;
+      font-size: 0.92rem; font-family: 'DM Sans', sans-serif;
+      background: var(--white); color: var(--text);
+      transition: all 0.2s; outline: none;
+      appearance: none;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(26,124,79,0.1);
+    }
+
+    .btn-submit {
+      width: 100%; padding: 0.95rem;
+      background: var(--green); color: var(--white);
+      border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer; transition: all 0.25s;
+      margin-top: 0.5rem;
+      box-shadow: 0 4px 16px rgba(26,124,79,0.3);
+    }
+    .btn-submit:hover { background: var(--green-light); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+    .error-msg {
+      background: #fff5f5; border: 1px solid #fed7d7;
+      color: var(--error); padding: 0.8rem 1rem;
+      border-radius: 10px; font-size: 0.88rem;
+      margin-bottom: 1rem; display: none;
+    }
+    .error-msg.show { display: block; }
+    .success-msg {
+      background: var(--green-pale); border: 1px solid rgba(26,124,79,0.2);
+      color: var(--green); padding: 0.8rem 1rem;
+      border-radius: 10px; font-size: 0.88rem;
+      margin-bottom: 1rem; display: none;
+    }
+    .success-msg.show { display: block; }
+
+    @media (max-width: 768px) {
+      body { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 2rem 1.5rem; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <a href="index.html" class="panel-logo">Extra2<span>Essential</span></a>
+  <div class="panel-content">
+    <h2>Join the <span>movement</span> today</h2>
+    <p>Whether you have something to give or a community to serve — Extra2Essential connects you with purpose.</p>
+  </div>
+  <div class="role-cards">
+    <div class="role-card">
+      <span class="role-card-icon">📦</span>
+      <div class="role-card-text">
+        <strong>Donor</strong>
+        <span>List surplus items and connect with verified NGOs nearby</span>
+      </div>
+    </div>
+    <div class="role-card">
+      <span class="role-card-icon">🏢</span>
+      <div class="role-card-text">
+        <strong>NGO</strong>
+        <span>Browse donations, claim resources and deliver to communities</span>
+      </div>
+    </div>
+  </div>
+  <p class="panel-footer">Already have an account? <a href="login.html" style="color:#22a86a;">Sign in →</a></p>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-box">
+    <h1>Create account</h1>
+    <p class="subtitle">Already registered? <a href="login.html">Sign in →</a></p>
+
+    <!-- ROLE SELECTOR -->
+    <div class="role-selector">
+      <div class="role-btn active" id="donorBtn" onclick="selectRole('DONOR')">
+        <span class="role-emoji">📦</span>
+        <span class="role-name">Donor</span>
+        <span class="role-desc">I want to donate</span>
+      </div>
+      <div class="role-btn" id="ngoBtn" onclick="selectRole('NGO')">
+        <span class="role-emoji">🏢</span>
+        <span class="role-name">NGO</span>
+        <span class="role-desc">I represent an NGO</span>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="Ajay Kumar"/>
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="city" placeholder="Pune"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="ajaykumar@example.com"/>
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Min 8 characters"/>
+    </div>
+
+    <div class="form-group">
+      <label>Confirm Password</label>
+      <input type="password" id="confirmPassword" placeholder="Repeat password"/>
+    </div>
+
+    <button class="btn-submit" id="registerBtn" onclick="handleRegister()">
+      Create Account →
+    </button>
+  </div>
+</div>
+
+<script>
+  let selectedRole = 'DONOR';
+
+  // Pre-select role from URL param
+  const urlParams = new URLSearchParams(window.location.search);
+  const roleParam = urlParams.get('role');
+  if (roleParam) selectRole(roleParam.toUpperCase());
+
+  function selectRole(role) 
+  {
+    selectedRole = role;
+    document.getElementById('donorBtn').classList.toggle('active', role === 'DONOR');
+    document.getElementById('ngoBtn').classList.toggle('active', role === 'NGO');
+  }
+
+  async function handleRegister() 
+  {
+    const name = document.getElementById('name').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
+    const btn = document.getElementById('registerBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+
+    errorMsg.classList.remove('show');
+    successMsg.classList.remove('show');
+
+    if (!name || !city || !email || !password || !confirmPassword) 
+    {
+      errorMsg.textContent = 'Please fill in all fields.';
+      errorMsg.classList.add('show'); return;
+    }
+    
+    // Strong password validation
+    const passwordErrors = [];
+    if (password.length < 8) passwordErrors.push('at least 8 characters');
+    if (!/[A-Z]/.test(password)) passwordErrors.push('one uppercase letter (A-Z)');
+    if (!/[0-9]/.test(password)) passwordErrors.push('one number (0-9)');
+    if (!/[^A-Za-z0-9]/.test(password)) passwordErrors.push('one special character (@, #, !, etc.)');
+
+    if (passwordErrors.length > 0) 
+    {
+      errorMsg.innerHTML = '❌ Password must contain: <br>• ' + passwordErrors.join('<br>• ');
+      errorMsg.classList.add('show'); return;
+    }
+
+    if (password !== confirmPassword) 
+    {
+      errorMsg.textContent = '❌ Passwords do not match. Please re-enter.';
+      errorMsg.classList.add('show'); return;
+    } 
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try 
+    {
+      const res = await fetch('/api/auth/register', 
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, city, email, password, role: selectedRole })
+      });
+
+      const text = await res.text();
+
+      if (res.ok) 
+      {
+        successMsg.textContent = '🎉 Account created! Redirecting to login...';
+        successMsg.classList.add('show');
+        setTimeout(() => window.location.href = 'login.html', 1500);
+      } 
+      else 
+      {
+        errorMsg.textContent = text || 'Registration failed. Try again.';
+        errorMsg.classList.add('show');
+      }
+    }
+     catch (err) 
+     {
+      errorMsg.textContent = 'Server error. Please try again.';
+      errorMsg.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Create Account →';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleRegister();
+  });
+
+  function checkPassword(val) 
+  {
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const colors = ['#e53e3e','#e53e3e','#f0a865','#22a86a','#1a7c4f'];
+    const labels = ['','Weak','Fair','Good','Strong 💪'];
+    const widths = ['0%','25%','50%','75%','100%'];
+
+    document.getElementById('strengthFill').style.width = widths[score];
+    document.getElementById('strengthFill').style.background = colors[score];
+    document.getElementById('strengthText').textContent = labels[score];
+    document.getElementById('strengthText').style.color = colors[score];
+  }
+</script>
+</body>
+</html>
