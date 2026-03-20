@@ -2,6 +2,9 @@ package com.Extra2Essentials.Extra2Essentials.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +17,23 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    private long expiration = 86400000L; // 1 day
+    @Value("${jwt.expiration:86400000}")
+    private String expirationStr;
+
+    private long expiration;
+
+    @PostConstruct
+    public void init() 
+    {
+        try 
+        {
+            expiration = Long.parseLong(expirationStr);
+        } 
+        catch (Exception e) 
+        {
+            expiration = 86400000L;
+        }
+    }
 
     private Key getKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
