@@ -345,6 +345,11 @@
     'guwahati': [26.1445, 91.7362],
     // Chhattisgarh
     'raipur': [21.2514, 81.6296],
+    //
+    'barsana': [27.5794, 77.6964],
+    'jagannathpuri': [19.8135, 85.8312],
+    'vijaywada': [16.5062, 80.6480],
+    'vijayawada': [16.5062, 80.6480],
     // Default — Center of India
     'default': [20.5937, 78.9629]
   };
@@ -441,7 +446,8 @@ const map = L.map('map', { zoomControl: true }).setView([20.5937, 78.9629], 5);
   }
 
   function focusDonation(index, city) {
-    const coords = getCoords(city);
+    const donation = allDonations[index];
+    const coords = getCoords(donation);
     map.setView(coords, 13, { animate: true });
     if (markers[index]) markers[index].openPopup();
     document.querySelectorAll('.don-list-item').forEach((el,i) => {

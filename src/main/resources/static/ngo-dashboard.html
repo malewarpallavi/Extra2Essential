@@ -145,7 +145,6 @@
   <button class="nav-item active" onclick="showView('dashboard', this)"><span class="nav-icon">🏠</span> Dashboard</button>
   <button class="nav-item" onclick="showView('browse', this)"><span class="nav-icon">🔍</span> Browse Donations</button>
   <button class="nav-item" onclick="showView('claimed', this)"><span class="nav-icon">✅</span> Claimed Items</button>
-  <button class="nav-item" onclick="showView('aiMatch', this)"><span class="nav-icon">🤖</span> AI Matching</button>
   <button class="nav-item" onclick="window.location.href='map.html'">
     <span class="nav-icon">🗺️</span> Live Map
   </button>
@@ -243,40 +242,6 @@
     <div class="section-card">
       <div id="claimedList">
         <div class="empty-state"><span class="empty-icon">⏳</span><p>Loading...</p></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AI MATCHING -->
-  <div class="view" id="view-aiMatch">
-    <div class="page-header">
-      <h1>AI Smart Matching 🤖</h1>
-      <p>Gemini AI suggests the best donations for your NGO</p>
-    </div>
-    <div style="max-width:700px">
-      <div class="ai-card" style="margin-bottom:1.5rem">
-        <h3>🤖 Gemini AI</h3>
-        <div class="ai-title">Intelligent Donation Matching</div>
-        <p>Our AI analyzes available donations, your NGO's location, and community needs to suggest the most impactful items to claim.</p>
-        <button class="btn-ai" onclick="getFullAISuggestion()">Analyze & Suggest →</button>
-        <div class="ai-result" id="fullAiResult"></div>
-      </div>
-      <div class="section-card">
-        <div class="section-card-header"><h2>How AI Matching Works</h2></div>
-        <div style="display:flex;flex-direction:column;gap:1rem">
-          <div style="display:flex;gap:1rem;align-items:flex-start">
-            <div style="width:36px;height:36px;border-radius:10px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0">🗺️</div>
-            <div><strong style="display:block;font-size:0.92rem;color:var(--dark)">Location Analysis</strong><span style="font-size:0.85rem;color:var(--muted)">AI checks donations in your city and nearby areas</span></div>
-          </div>
-          <div style="display:flex;gap:1rem;align-items:flex-start">
-            <div style="width:36px;height:36px;border-radius:10px;background:#fff3e0;display:flex;align-items:center;justify-content:center;flex-shrink:0">📊</div>
-            <div><strong style="display:block;font-size:0.92rem;color:var(--dark)">Demand Matching</strong><span style="font-size:0.85rem;color:var(--muted)">Matches donation categories with community needs</span></div>
-          </div>
-          <div style="display:flex;gap:1rem;align-items:flex-start">
-            <div style="width:36px;height:36px;border-radius:10px;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;flex-shrink:0">⚡</div>
-            <div><strong style="display:block;font-size:0.92rem;color:var(--dark)">Priority Scoring</strong><span style="font-size:0.85rem;color:var(--muted)">Ranks donations by urgency, quantity and pickup ease</span></div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
