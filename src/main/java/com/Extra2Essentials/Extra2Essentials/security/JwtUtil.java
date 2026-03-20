@@ -14,8 +14,7 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration:86400000}")
-    private long expiration = 86400000;
+    private long expiration = 86400000L; // 1 day
 
     private Key getKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
