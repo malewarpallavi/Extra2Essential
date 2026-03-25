@@ -389,7 +389,7 @@
   async function loadData() {
     try {
       const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
-      const res = await fetch('/api/donations', { headers });
+      const res = await fetch('/api/donations/all', { headers });
       const donations = await res.json();
       updateCharts(donations);
     } catch (e) {

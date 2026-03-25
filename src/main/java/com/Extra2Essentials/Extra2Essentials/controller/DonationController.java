@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import com.Extra2Essentials.Extra2Essentials.model.Role;
-import com.Extra2Essentials.Extra2Essentials.repository.UserRepository;
 import java.util.List;
 
 import java.time.LocalDate;
@@ -56,6 +54,12 @@ public class DonationController {
     @GetMapping
     public ResponseEntity<List<Donation>> getAllDonations() {
         return ResponseEntity.ok(donationRepository.findByStatus(DonationStatus.AVAILABLE));
+    }
+
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Donation>> getAllDonationsForImpact() {
+        return ResponseEntity.ok(donationRepository.findAll());
     }
 
     // Get donations by city
