@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Donation Map — Extra2Essential</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #1a7c4f; --green-light: #22a86a; --green-pale: #e8f7ef;
+      --earth: #c8702a; --earth-light: #f0a865;
+      --cream: #faf7f2; --dark: #141a12;
+      --mid: #3a4a35; --text: #2d3a28; --muted: #7a8c73;
+      --white: #ffffff; --border: #e2ede8;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* TOP NAV */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 2rem; background: var(--dark);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0; z-index: 1000;
+    }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--white); text-decoration: none; }
+    .nav-logo span { color: var(--earth-light); }
+    .nav-right { display: flex; gap: 0.8rem; align-items: center; }
+    .nav-btn { padding: 0.45rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; text-decoration: none; transition: all 0.2s; border: none; }
+    .btn-outline { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.12); }
+    .btn-outline:hover { background: rgba(255,255,255,0.14); color: var(--white); }
+    .btn-green { background: var(--green); color: var(--white); }
+    .btn-green:hover { background: var(--green-light); }
+
+    /* LAYOUT */
+    .map-layout { display: flex; flex: 1; overflow: hidden; }
+
+    /* SIDEBAR */
+    .map-sidebar {
+      width: 340px; background: var(--white);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .sidebar-top { padding: 1.2rem; border-bottom: 1px solid var(--border); }
+    .sidebar-top h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem; color: var(--dark); margin-bottom: 0.8rem; }
+
+    /* FILTERS */
+    .filter-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+    .filter-chip { padding: 0.35rem 0.8rem; border-radius: 50px; border: 1.5px solid var(--border); background: var(--white); color: var(--muted); font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+    .filter-chip:hover, .filter-chip.active { border-color: var(--green); color: var(--green); background: var(--green-pale); }
+    .search-input { width: 100%; padding: 0.6rem 0.9rem; border: 1.5px solid var(--border); border-radius: 10px; font-size: 0.88rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
+    .search-input:focus { border-color: var(--green); }
+
+    /* DONATION LIST */
+    .donation-scroll { flex: 1; overflow-y: auto; padding: 0.8rem; }
+    .don-list-item {
+      display: flex; gap: 0.8rem; padding: 0.9rem;
+      border: 1.5px solid var(--border); border-radius: 12px;
+      margin-bottom: 0.6rem; cursor: pointer; transition: all 0.2s;
+      background: #fafafa;
+    }
+    .don-list-item:hover, .don-list-item.highlighted { border-color: var(--green); background: var(--white); box-shadow: 0 4px 12px rgba(26,124,79,0.08); }
+    .don-cat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .cat-FOOD { background: #fff3e0; }
+    .cat-CLOTHES { background: #e8f5e9; }
+    .cat-BOOKS { background: #e3f2fd; }
+    .cat-OTHER { background: #f3e5f5; }
+    .don-list-info { flex: 1; min-width: 0; }
+    .don-list-info strong { display: block; font-size: 0.88rem; color: var(--dark); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .don-list-info span { font-size: 0.75rem; color: var(--muted); }
+    .don-list-badge { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 50px; align-self: flex-start; white-space: nowrap; }
+    .badge-AVAILABLE { background: var(--green-pale); color: var(--green); }
+    .badge-CLAIMED { background: #fff3e0; color: var(--earth); }
+
+    /* STATS BAR */
+    .stats-bar { padding: 0.8rem 1.2rem; background: var(--dark); display: flex; gap: 1.5rem; }
+    .stat-mini { text-align: center; }
+    .stat-mini strong { display: block; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--green-light); }
+    .stat-mini span { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+
+    /* MAP */
+    #map { flex: 1; z-index: 1; }
+
+    /* POPUP STYLES */
+    .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 8px 30px rgba(0,0,0,0.15) !important; border: none !important; padding: 0 !important; overflow: hidden; }
+    .leaflet-popup-content { margin: 0 !important; width: 240px !important; }
+    .popup-inner { padding: 1rem; }
+    .popup-inner h4 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--dark); margin-bottom: 0.4rem; }
+    .popup-inner p { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.3rem; }
+    .popup-badge { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 50px; margin-bottom: 0.8rem; }
+    .popup-claim-btn { display: block; width: 100%; padding: 0.6rem; background: var(--green); color: var(--white); border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; text-align: center; text-decoration: none; }
+    .popup-claim-btn:hover { background: var(--green-light); }
+
+    .empty-state { text-align: center; padding: 2rem 1rem; color: var(--muted); }
+    .empty-state .empty-icon { font-size: 2rem; margin-bottom: 0.6rem; display: block; }
+    .empty-state p { font-size: 0.85rem; }
+
+    /* LOADING */
+    .map-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--white); padding: 1.5rem 2rem; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); z-index: 999; text-align: center; font-weight: 600; color: var(--mid); display: none; }
+    .map-loading.show { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">Extra2<span>Essential</span></a>
+  <div class="nav-right">
+    <a href="donor-dashboard.html" class="nav-btn btn-outline">Donor Dashboard</a>
+    <a href="ngo-dashboard.html" class="nav-btn btn-outline">NGO Dashboard</a>
+    <a href="login.html" class="nav-btn btn-green" id="authBtn">Login</a>
+  </div>
+</nav>
+
+<!-- MAP LAYOUT -->
+<div class="map-layout">
+
+  <!-- SIDEBAR -->
+  <div class="map-sidebar">
+    <div class="sidebar-top">
+      <h2>🗺️ Donations Near You</h2>
+      <input class="search-input" id="searchInput" placeholder="Search by city or item..." oninput="filterList()"/>
+      <div class="filter-row" style="margin-top:0.6rem;margin-bottom:0">
+        <div class="filter-chip active" onclick="setFilter('ALL',this)">All</div>
+        <div class="filter-chip" onclick="setFilter('FOOD',this)">🍱 Food</div>
+        <div class="filter-chip" onclick="setFilter('CLOTHES',this)">👗 Clothes</div>
+        <div class="filter-chip" onclick="setFilter('BOOKS',this)">📚 Books</div>
+        <div class="filter-chip" onclick="setFilter('OTHER',this)">📦 Other</div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-mini"><strong id="statAvail">0</strong><span>Available</span></div>
+      <div class="stat-mini"><strong id="statClaimed">0</strong><span>Claimed</span></div>
+      <div class="stat-mini"><strong id="statCities">0</strong><span>Cities</span></div>
+    </div>
+
+    <div class="donation-scroll" id="donationList">
+      <div class="empty-state"><span class="empty-icon">⏳</span><p>Loading donations...</p></div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div id="map"></div>
+</div>
+
+<div class="map-loading" id="mapLoading">📍 Loading map...</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+  const token = localStorage.getItem('token');
+  const role = localStorage.getItem('role');
+  if (token) {
+    const btn = document.getElementById('authBtn');
+    btn.textContent = role === 'DONOR' ? 'My Dashboard' : 'NGO Dashboard';
+    btn.href = role === 'DONOR' ? 'donor-dashboard.html' : 'ngo-dashboard.html';
+  }
+
+  
+  const cityCoords = {
+    // ── MAHARASHTRA – All 36 Districts ──────────────────
+    // Konkan Division
+    'mumbai': [19.0760, 72.8777],
+    'navi mumbai': [19.0330, 73.0297],
+    'thane': [19.2183, 72.9781],
+    'kalyan': [19.2437, 73.1355],
+    'dombivli': [19.2183, 73.0865],
+    'ulhasnagar': [19.2183, 73.1530],
+    'mira road': [19.2812, 72.8726],
+    'vasai': [19.3919, 72.8397],
+    'virar': [19.4597, 72.8117],
+    'raigad': [18.5158, 73.1776],
+    'alibag': [18.6414, 72.8722],
+    'panvel': [18.9894, 73.1175],
+    'ratnagiri': [16.9902, 73.3120],
+    'sindhudurg': [16.3492, 73.5667],
+    'kudal': [16.0136, 73.6852],
+    'palghar': [19.6967, 72.7650],
+    'boisar': [19.8000, 72.7667],
+    // Pune Division
+    'pune': [18.5204, 73.8567],
+    'pimpri': [18.6279, 73.7997],
+    'chinchwad': [18.6279, 73.7997],
+    'pimpri chinchwad': [18.6279, 73.7997],
+    'solapur': [17.6868, 75.9062],
+    'satara': [17.6805, 74.0183],
+    'sangli': [16.8524, 74.5815],
+    'miraj': [16.8240, 74.6451],
+    'kolhapur': [16.7050, 74.2433],
+    'ichalkaranji': [16.6930, 74.4615],
+    'nashik': [19.9975, 73.7898],
+    'malegaon': [20.5579, 74.5089],
+    'ahmednagar': [19.0948, 74.7480],
+    'baramati': [18.1517, 74.5822],
+    'shirdi': [19.7659, 74.4773],
+    // Aurangabad / Chhatrapati Sambhajinagar Division
+    'aurangabad': [19.8762, 75.3433],
+    'chhatrapati sambhajinagar': [19.8762, 75.3433],
+    'jalna': [19.8347, 75.8816],
+    'beed': [18.9890, 75.7602],
+    'osmanabad': [18.1860, 76.0434],
+    'dharashiv': [18.1860, 76.0434],
+    'latur': [18.4088, 76.5604],
+    'nanded': [19.1383, 77.3210],
+    'hingoli': [19.7177, 77.1500],
+    'parbhani': [19.2704, 76.7749],
+    // Amravati Division
+    'amravati': [20.9320, 77.7523],
+    'akola': [20.7002, 77.0082],
+    'washim': [20.1114, 77.1322],
+    'buldhana': [20.5292, 76.1842],
+    'yavatmal': [20.3888, 78.1204],
+    // Nagpur Division
+    'nagpur': [21.1458, 79.0882],
+    'wardha': [20.7453, 78.6022],
+    'chandrapur': [19.9615, 79.2961],
+    'gadchiroli': [20.1809, 80.0000],
+    'gondia': [21.4628, 80.1946],
+    'bhandara': [21.1667, 79.6500],
+    // Nashik Division extra
+    'dhule': [20.9042, 74.7749],
+    'nandurbar': [21.3667, 74.2333],
+    'jalgaon': [21.0077, 75.5626],
+    // Other Maharashtra cities
+    'badlapur': [19.1504, 73.2637],
+    'ambernath': [19.1974, 73.1896],
+    'bhiwandi': [19.2988, 73.0634],
+    'wai': [17.9543, 73.8967],
+    'karad': [17.2880, 74.1830],
+    'pandharpur': [17.6805, 75.3280],
+    'barshi': [18.2333, 75.6920],
+    'kopargaon': [19.8833, 74.4833],
+    'ahmednagar': [19.0948, 74.7480],
+    'shegaon': [20.7952, 76.6980],
+    'khamgaon': [20.7090, 76.5690],
+    'akot': [21.0980, 77.0570],
+    'morshi': [21.3333, 78.0000],
+    'daryapur': [20.9167, 77.3333],
+    'pusad': [19.9100, 77.5800],
+    'wani': [20.0580, 78.9530],
+    'narkhed': [21.4490, 78.5780],
+    'kamthi': [21.2167, 79.2000],
+    'hinganghat': [20.5500, 78.8333],
+    'warda': [20.7453, 78.6022],
+    'arvi': [20.9833, 78.2333],
+    'deoli': [20.6333, 78.4667],
+    'umred': [20.8500, 79.3167],
+    'saoner': [21.3833, 78.9167],
+    'katol': [21.2667, 78.5833],
+    'nile': [21.3167, 78.3667],
+    'ramtek': [21.3937, 79.3280],
+    'tumsar': [21.3833, 79.7333],
+    'tirora': [21.4000, 80.0667],
+    'desaiganj': [20.7000, 79.9667],
+    'mul': [20.0667, 79.6667],
+    'rajura': [19.7833, 79.3667],
+    'ballarpur': [19.8667, 79.3333],
+    'warora': [20.2333, 79.0000],
+    'chimur': [20.4833, 79.2833],
+    'bhadravati': [20.0000, 79.1500],
+    'nagbhid': [20.5667, 79.9167],
+  
+    // ── OTHER MAJOR INDIAN CITIES ────────────────────────
+    // Delhi NCR
+    'delhi': [28.6139, 77.2090],
+    'new delhi': [28.6139, 77.2090],
+    'noida': [28.5355, 77.3910],
+    'gurgaon': [28.4595, 77.0266],
+    'gurugram': [28.4595, 77.0266],
+    'faridabad': [28.4089, 77.3178],
+    'ghaziabad': [28.6692, 77.4538],
+    // Karnataka
+    'bangalore': [12.9716, 77.5946],
+    'bengaluru': [12.9716, 77.5946],
+    'mysore': [12.2958, 76.6394],
+    'mysuru': [12.2958, 76.6394],
+    'hubli': [15.3647, 75.1240],
+    'mangalore': [12.9141, 74.8560],
+    // Tamil Nadu
+    'chennai': [13.0827, 80.2707],
+    'coimbatore': [11.0168, 76.9558],
+    'madurai': [9.9252, 78.1198],
+    'salem': [11.6643, 78.1460],
+    // Telangana / AP
+    'hyderabad': [17.3850, 78.4867],
+    'secunderabad': [17.4399, 78.4983],
+    'warangal': [17.9784, 79.5941],
+    'vijayawada': [16.5062, 80.6480],
+    'visakhapatnam': [17.6868, 83.2185],
+    'vizag': [17.6868, 83.2185],
+    // West Bengal
+    'kolkata': [22.5726, 88.3639],
+    'howrah': [22.5958, 88.2636],
+    'durgapur': [23.5204, 87.3119],
+    // Gujarat
+    'ahmedabad': [23.0225, 72.5714],
+    'surat': [21.1702, 72.8311],
+    'vadodara': [22.3072, 73.1812],
+    'rajkot': [22.3039, 70.8022],
+    // Rajasthan
+    'jaipur': [26.9124, 75.7873],
+    'jodhpur': [26.2389, 73.0243],
+    'udaipur': [24.5854, 73.7125],
+    'kota': [25.2138, 75.8648],
+    // Madhya Pradesh
+    'bhopal': [23.2599, 77.4126],
+    'indore': [22.7196, 75.8577],
+    'gwalior': [26.2183, 78.1828],
+    'jabalpur': [23.1815, 79.9864],
+    // Uttar Pradesh
+    'lucknow': [26.8467, 80.9462],
+    'kanpur': [26.4499, 80.3319],
+    'agra': [27.1767, 78.0081],
+    'varanasi': [25.3176, 82.9739],
+    'prayagraj': [25.4358, 81.8463],
+    'allahabad': [25.4358, 81.8463],
+    'meerut': [28.9845, 77.7064],
+    'vrindavan': [27.5794, 77.6964],
+    'mathura': [27.4924, 77.6737],
+    // Bihar
+    'patna': [25.5941, 85.1376],
+    'gaya': [24.7955, 85.0002],
+    // Jharkhand
+    'ranchi': [23.3441, 85.3096],
+    'jamshedpur': [22.8046, 86.2029],
+    // Odisha
+    'bhubaneswar': [20.2961, 85.8245],
+    'cuttack': [20.4625, 85.8828],
+    // Punjab / Haryana
+    'chandigarh': [30.7333, 76.7794],
+    'ludhiana': [30.9010, 75.8573],
+    'amritsar': [31.6340, 74.8723],
+    'jalandhar': [31.3260, 75.5762],
+    // Himachal / Uttarakhand
+    'shimla': [31.1048, 77.1734],
+    'dehradun': [30.3165, 78.0322],
+    'haridwar': [29.9457, 78.1642],
+    // Kerala
+    'kochi': [9.9312, 76.2673],
+    'thiruvananthapuram': [8.5241, 76.9366],
+    'kozhikode': [11.2588, 75.7804],
+    // Assam / NE
+    'guwahati': [26.1445, 91.7362],
+    // Chhattisgarh
+    'raipur': [21.2514, 81.6296],
+    //
+    'barsana': [27.5794, 77.6964],
+    'jagannathpuri': [19.8135, 85.8312],
+    'vijaywada': [16.5062, 80.6480],
+    'vijayawada': [16.5062, 80.6480],
+    // Default — Center of India
+    'default': [20.5937, 78.9629]
+  };
+ 
+
+
+  function getCoords(donation) {
+    if (donation.latitude && donation.longitude) {
+      return [donation.latitude, donation.longitude];
+    }
+    const key = donation.city?.toLowerCase().trim();
+    if (cityCoords[key]) return cityCoords[key];
+    
+    // Try partial match
+    const partial = Object.keys(cityCoords).find(k => 
+      key && (key.includes(k) || k.includes(key))
+    );
+    return partial ? cityCoords[partial] : cityCoords.default;
+  }
+
+  const catEmoji = { FOOD: '🍱', CLOTHES: '👗', BOOKS: '📚', OTHER: '📦' };
+  const catColor = { FOOD: '#e65100', CLOTHES: '#2e7d32', BOOKS: '#1565c0', OTHER: '#6a1b9a' };
+
+  // Custom marker
+  function createMarker(category, status) {
+    const color = status === 'AVAILABLE' ? catColor[category] || '#1a7c4f' : '#999';
+    return L.divIcon({
+      html: `<div style="
+        width:36px;height:36px;border-radius:50% 50% 50% 0;
+        background:${color};transform:rotate(-45deg);
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 4px 12px rgba(0,0,0,0.25);
+        border:2px solid white;
+      "><span style="transform:rotate(45deg);font-size:1rem">${catEmoji[category]||'📦'}</span></div>`,
+      className: '', iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -36]
+    });
+  }
+
+  // Init map
+const map = L.map('map', { zoomControl: true }).setView([20.5937, 78.9629], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 18
+  }).addTo(map);
+
+  let allDonations = [];
+  let markers = [];
+  let activeFilter = 'ALL';
+
+  function clearMarkers() {
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+  }
+
+  function renderMap(donations) {
+    clearMarkers();
+    donations.forEach(d => {
+      const coords = getCoords(d);
+      const marker = L.marker(coords, { icon: createMarker(d.category, d.status) });
+      const isNGO = role === 'NGO';
+      const canClaim = isNGO && d.status === 'AVAILABLE';
+      marker.bindPopup(`
+        <div class="popup-inner">
+          <span class="popup-badge ${d.status === 'AVAILABLE' ? 'badge-AVAILABLE' : 'badge-CLAIMED'}">${d.status}</span>
+          <h4>${catEmoji[d.category]} ${d.title}</h4>
+          <p>📍 ${d.city}</p>
+          <p>📦 ${d.quantity} items</p>
+          <p>📅 Pickup: ${d.pickupDate}</p>
+          <p>👤 By: ${d.donor?.name || 'Donor'}</p>
+          ${canClaim
+            ? `<button class="popup-claim-btn" onclick="claimFromMap(${d.id}, this)">Claim This →</button>`
+            : `<div style="text-align:center;font-size:0.8rem;color:var(--muted);margin-top:0.5rem">${d.status === 'CLAIMED' ? '✅ Already claimed' : 'Login as NGO to claim'}</div>`
+          }
+        </div>`);
+      marker.addTo(map);
+      markers.push(marker);
+    });
+  }
+
+  function renderList(donations) {
+    const el = document.getElementById('donationList');
+    if (donations.length === 0) {
+      el.innerHTML = `<div class="empty-state"><span class="empty-icon">🔍</span><p>No donations found.</p></div>`;
+      return;
+    }
+    el.innerHTML = donations.map((d, i) => `
+      <div class="don-list-item" onclick="focusDonation(${i}, '${d.city}')">
+        <div class="don-cat-icon cat-${d.category}">${catEmoji[d.category]||'📦'}</div>
+        <div class="don-list-info">
+          <strong>${d.title}</strong>
+          <span>📍 ${d.city} · ${d.quantity} items</span>
+        </div>
+        <span class="don-list-badge badge-${d.status}">${d.status}</span>
+      </div>`).join('');
+  }
+
+  function focusDonation(index, city) {
+    const donation = allDonations[index];
+    const coords = getCoords(donation);
+    map.setView(coords, 13, { animate: true });
+    if (markers[index]) markers[index].openPopup();
+    document.querySelectorAll('.don-list-item').forEach((el,i) => {
+      el.classList.toggle('highlighted', i === index);
+    });
+  }
+
+  function updateStats(donations) {
+    const avail = donations.filter(d => d.status === 'AVAILABLE').length;
+    const claimed = donations.filter(d => d.status === 'CLAIMED').length;
+    const cities = [...new Set(donations.map(d => d.city?.toLowerCase()))].length;
+    document.getElementById('statAvail').textContent = avail;
+    document.getElementById('statClaimed').textContent = claimed;
+    document.getElementById('statCities').textContent = cities;
+  }
+
+  function setFilter(cat, btn) {
+    activeFilter = cat;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  }
+
+  function filterList() { applyFilters(); }
+
+  function applyFilters() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = allDonations;
+    if (activeFilter !== 'ALL') filtered = filtered.filter(d => d.category === activeFilter);
+    if (search) filtered = filtered.filter(d =>
+      d.title?.toLowerCase().includes(search) ||
+      d.city?.toLowerCase().includes(search)
+    );
+    renderMap(filtered);
+    renderList(filtered);
+  }
+
+  async function claimFromMap(id, btn) {
+    if (!token) { window.location.href = 'login.html'; return; }
+    btn.textContent = 'Claiming...'; btn.disabled = true;
+    try {
+      const res = await fetch(`/api/donations/${id}/claim`, {
+        method: 'PUT', headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (res.ok) {
+        btn.textContent = '✅ Claimed!';
+        btn.style.background = 'var(--green-pale)';
+        btn.style.color = 'var(--green)';
+        loadDonations();
+      } else {
+        btn.textContent = 'Already claimed';
+        btn.disabled = true;
+      }
+    } catch (e) {
+      btn.textContent = 'Error. Try again.'; btn.disabled = false;
+    }
+  }
+
+  async function loadDonations() {
+    try {
+      const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+      const res = await fetch('/api/donations', { headers });
+      allDonations = await res.json();
+      updateStats(allDonations);
+      applyFilters();
+    } catch (e) {
+      // Add demo data if API fails
+      allDonations = [
+        { id:1, title:'Winter Clothes', category:'CLOTHES', quantity:30, city:'Pune', pickupDate:'2026-03-25', status:'AVAILABLE', donor:{name:'Pallavi'} },
+        { id:2, title:'School Books', category:'BOOKS', quantity:20, city:'Nashik', pickupDate:'2026-03-26', status:'AVAILABLE', donor:{name:'Rahul'} },
+        { id:3, title:'Food Packets', category:'FOOD', quantity:50, city:'Nagpur', pickupDate:'2026-03-24', status:'CLAIMED', donor:{name:'Priya'} },
+        { id:4, title:'Household Items', category:'OTHER', quantity:15, city:'Mumbai', pickupDate:'2026-03-27', status:'AVAILABLE', donor:{name:'Amit'} },
+      ];
+      updateStats(allDonations);
+      applyFilters();
+    }
+  }
+
+  loadDonations();
+</script>
+</body>
+</html>

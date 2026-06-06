@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Corporate CSR Dashboard — Extra2Essential</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --navy:#0B1E3D;--navy2:#132850;--teal:#0D7377;--teal2:#14A085;--teal3:#1ABFAD;
+      --amber:#F5A623;--amber2:#FFC754;--white:#FFFFFF;--offwhite:#F4F7FA;
+      --slate:#8FA3B1;--slate2:#5C7A8A;--light:#E8F4F6;--dark:#040D1A;
+      --green:#27AE60;--red:#E74C3C;--purple:#8B5CF6;--border:#E2EDF0;
+      --sidebar-w:260px;
+    }
+    body{font-family:'DM Sans',sans-serif;background:var(--offwhite);color:var(--navy);display:flex;min-height:100vh}
+    .sidebar{width:var(--sidebar-w);background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;padding:1.5rem;overflow-y:auto}
+    .sidebar-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;text-decoration:none;margin-bottom:0.5rem;display:block}
+    .sidebar-logo span{color:var(--amber)}
+    .sidebar-tag{font-size:0.72rem;color:var(--slate);margin-bottom:2rem;padding:0.25rem 0.6rem;background:rgba(255,255,255,0.06);border-radius:50px;display:inline-block}
+    .nav-section{font-size:0.7rem;color:var(--slate);font-weight:600;letter-spacing:1.5px;margin:1rem 0 0.5rem;padding:0 0.75rem}
+    .nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.75rem;border-radius:10px;color:rgba(255,255,255,0.5);font-size:0.9rem;font-weight:500;transition:all 0.2s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+    .nav-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+    .nav-item.active{background:rgba(20,160,133,0.2);color:var(--teal3)}
+    .sidebar-footer{margin-top:auto;padding-top:1rem}
+    .company-card{background:rgba(255,255,255,0.06);border-radius:12px;padding:1rem;margin-bottom:0.75rem}
+    .company-name{color:#fff;font-size:0.88rem;font-weight:600}
+    .company-industry{color:var(--slate);font-size:0.75rem;margin-top:0.2rem}
+    .csr-progress{margin-top:0.75rem}
+    .csr-progress-label{display:flex;justify-content:space-between;font-size:0.72rem;color:var(--slate);margin-bottom:0.3rem}
+    .csr-bar{height:5px;background:rgba(255,255,255,0.1);border-radius:50px;overflow:hidden}
+    .csr-bar-fill{height:100%;background:var(--teal2);border-radius:50px;transition:width 1s}
+    .logout-btn{width:100%;padding:0.6rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.4);font-size:0.82rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s}
+    .logout-btn:hover{background:rgba(229,62,62,0.1);color:#fc8181}
+    .main{margin-left:var(--sidebar-w);flex:1;padding:2rem;overflow-y:auto}
+    .page-header{margin-bottom:2rem}
+    .page-header h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--navy)}
+    .page-header p{color:var(--slate2);font-size:0.95rem;margin-top:0.3rem}
+    .view{display:none}
+    .view.active{display:block}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2rem}
+    .stat-card{background:#fff;border-radius:16px;padding:1.4rem;border:1px solid var(--border);position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .stat-card.teal::before{background:var(--teal2)}
+    .stat-card.amber::before{background:var(--amber)}
+    .stat-card.green::before{background:var(--green)}
+    .stat-card.purple::before{background:var(--purple)}
+    .stat-icon{font-size:1.5rem;margin-bottom:0.8rem}
+    .stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--navy)}
+    .stat-label{font-size:0.82rem;color:var(--slate2);margin-top:0.2rem}
+    .stat-change{font-size:0.78rem;margin-top:0.5rem}
+    .stat-change.up{color:var(--green)}
+    .card{background:#fff;border-radius:20px;padding:1.5rem;border:1px solid var(--border);margin-bottom:1.5rem}
+    .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+    .card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--navy)}
+    .card-subtitle{font-size:0.82rem;color:var(--slate2);margin-top:0.2rem}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.2rem}
+    .btn{padding:0.65rem 1.2rem;border-radius:10px;font-size:0.88rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;border:none}
+    .btn-primary{background:var(--teal2);color:#fff}
+    .btn-primary:hover{background:var(--teal3)}
+    .btn-outline{background:transparent;color:var(--teal2);border:1.5px solid var(--teal2)}
+    .btn-outline:hover{background:var(--light)}
+    .btn-amber{background:var(--amber);color:#fff}
+    .btn-sm{padding:0.4rem 0.8rem;font-size:0.8rem}
+    .table{width:100%;border-collapse:collapse}
+    .table th{font-size:0.78rem;font-weight:600;color:var(--slate2);text-transform:uppercase;letter-spacing:0.5px;padding:0.6rem 0.8rem;text-align:left;border-bottom:1px solid var(--border)}
+    .table td{padding:0.9rem 0.8rem;font-size:0.88rem;border-bottom:1px solid var(--border)}
+    .table tr:last-child td{border-bottom:none}
+    .table tr:hover td{background:var(--offwhite)}
+    .badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:50px;font-size:0.75rem;font-weight:600}
+    .badge-green{background:#D1FAE5;color:#065F46}
+    .badge-amber{background:#FEF3C7;color:#92400E}
+    .badge-blue{background:#DBEAFE;color:#1E40AF}
+    .badge-red{background:#FEE2E2;color:#991B1B}
+    .form-group{margin-bottom:1.2rem}
+    .form-label{display:block;font-size:0.85rem;font-weight:600;color:var(--navy2);margin-bottom:0.5rem}
+    .form-input{width:100%;padding:0.75rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s}
+    .form-input:focus{border-color:var(--teal2);box-shadow:0 0 0 3px rgba(20,160,133,0.1)}
+    .form-select{width:100%;padding:0.75rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .csr-meter{background:var(--offwhite);border-radius:16px;padding:1.2rem;margin-bottom:1rem}
+    .csr-meter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem}
+    .csr-meter-title{font-size:0.9rem;font-weight:600;color:var(--navy)}
+    .csr-meter-val{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--teal2)}
+    .csr-meter-bar{height:12px;background:#E2EDF0;border-radius:50px;overflow:hidden}
+    .csr-meter-fill{height:100%;border-radius:50px;transition:width 1.5s ease}
+    .csr-meter-labels{display:flex;justify-content:space-between;margin-top:0.4rem;font-size:0.75rem;color:var(--slate)}
+    .impact-item{display:flex;align-items:center;gap:1rem;padding:0.9rem;border:1px solid var(--border);border-radius:12px;margin-bottom:0.8rem;background:#fafafa}
+    .impact-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+    .impact-info{flex:1}
+    .impact-info strong{display:block;font-size:0.9rem;color:var(--navy)}
+    .impact-info span{font-size:0.8rem;color:var(--slate2)}
+    .impact-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--teal2)}
+    .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center}
+    .modal-overlay.show{display:flex}
+    .modal{background:#fff;border-radius:20px;padding:2rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+    .modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.2rem;color:var(--navy)}
+    .modal-close{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--slate)}
+    .ai-report-box{background:var(--navy);border-radius:16px;padding:1.5rem;color:#fff;margin-top:1rem}
+    .ai-report-box pre{white-space:pre-wrap;font-family:'DM Sans',sans-serif;font-size:0.9rem;line-height:1.6;color:rgba(255,255,255,0.85)}
+    .loading-spinner{display:inline-block;width:20px;height:20px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:0.5rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty-state{text-align:center;padding:3rem;color:var(--slate2)}
+    .empty-state .empty-icon{font-size:2.5rem;display:block;margin-bottom:0.8rem}
+    .notification{position:fixed;top:1rem;right:1rem;background:var(--navy);color:#fff;padding:0.8rem 1.2rem;border-radius:12px;font-size:0.88rem;z-index:9999;transform:translateX(120%);transition:transform 0.3s}
+    .notification.show{transform:translateX(0)}
+    .notification.success{background:var(--green)}
+    .notification.error{background:var(--red)}
+  </style>
+</head>
+<body>
+<div class="notification" id="notification"></div>
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-logo">Extra2<span>Essential</span></a>
+  <span class="sidebar-tag">💼 Corporate Portal</span>
+  <span class="nav-section">OVERVIEW</span>
+  <button class="nav-item active" onclick="showView('dashboard',this)"><span>🏠</span> Dashboard</button>
+  <button class="nav-item" onclick="showView('csr',this)"><span>📊</span> CSR Tracker</button>
+  <span class="nav-section">SURPLUS</span>
+  <button class="nav-item" onclick="showView('surplus',this)"><span>📦</span> Surplus Inventory</button>
+  <button class="nav-item" onclick="showView('donations',this)"><span>🤝</span> Donation History</button>
+  <span class="nav-section">AI TOOLS</span>
+  <button class="nav-item" onclick="showView('aiReport',this)"><span>🤖</span> AI Impact Report</button>
+  <button class="nav-item" onclick="showView('aiMatch',this)"><span>🎯</span> AI NGO Matching</button>
+  <span class="nav-section">ACCOUNT</span>
+  <button class="nav-item" onclick="showView('settings',this)"><span>⚙️</span> Settings</button>
+  <div class="sidebar-footer">
+    <div class="company-card">
+      <div class="company-name" id="sidebarCompany">Company</div>
+      <div class="company-industry" id="sidebarIndustry">Industry</div>
+      <div class="csr-progress">
+        <div class="csr-progress-label"><span>CSR Progress</span><span id="sidebarCSRPct">0%</span></div>
+        <div class="csr-bar"><div class="csr-bar-fill" id="sidebarCSRBar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <button class="logout-btn" onclick="logout()">← Sign Out</button>
+  </div>
+</aside>
+<main class="main">
+  <!-- DASHBOARD -->
+  <div class="view active" id="view-dashboard">
+    <div class="page-header">
+      <h1 id="welcomeMsg">Welcome! 💼</h1>
+      <p>Your CSR impact at a glance — <span id="todayDate"></span></p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card teal"><div class="stat-icon">💰</div><div class="stat-val" id="statCSRBudget">₹0Cr</div><div class="stat-label">CSR Budget</div><div class="stat-change up">Mandated by Companies Act</div></div>
+      <div class="stat-card amber"><div class="stat-icon">✅</div><div class="stat-val" id="statCSRSpent">₹0</div><div class="stat-label">CSR Spent</div><div class="stat-change up" id="statCSRPct">0% utilized</div></div>
+      <div class="stat-card green"><div class="stat-icon">📦</div><div class="stat-val" id="statDonations">0</div><div class="stat-label">Items Donated</div><div class="stat-change up">This year</div></div>
+      <div class="stat-card purple"><div class="stat-icon">👥</div><div class="stat-val" id="statLives">0</div><div class="stat-label">Units Redistributed</div><div class="stat-change up">Growing impact</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">CSR Compliance Meter</div><div class="card-subtitle">Track your mandatory CSR spending</div></div>
+          <span class="badge badge-green" id="complianceBadge">On Track</span>
+        </div>
+        <div class="csr-meter">
+          <div class="csr-meter-header"><span class="csr-meter-title">Annual CSR Budget Utilized</span><span class="csr-meter-val" id="meterPct">0%</span></div>
+          <div class="csr-meter-bar"><div class="csr-meter-fill" id="meterFill" style="width:0%;background:var(--teal2)"></div></div>
+          <div class="csr-meter-labels"><span>₹0</span><span id="meterBudget">₹0 Cr</span></div>
+        </div>
+        <div style="display:flex;gap:1rem;margin-top:1rem">
+          <button class="btn btn-primary btn-sm" onclick="showView('csr',document.querySelectorAll('.nav-item')[1])">View Details →</button>
+          <button class="btn btn-amber btn-sm" onclick="showView('aiReport',document.querySelectorAll('.nav-item')[4])">🤖 AI Report</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Donation by Category</div></div>
+          <button class="btn btn-primary btn-sm" onclick="openDonateModal()">+ Add Item</button>
+        </div>
+        <canvas id="categoryChart" height="180"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Donation Activity</div>
+        <button class="btn btn-outline btn-sm" onclick="showView('donations',document.querySelectorAll('.nav-item')[3])">View All</button>
+      </div>
+      <table class="table">
+        <thead><tr><th>Item</th><th>Category</th><th>Qty</th><th>Claimed By</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="recentDonations"><tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--slate2)">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CSR TRACKER -->
+  <div class="view" id="view-csr">
+    <div class="page-header"><h1>CSR Tracker 📊</h1><p>Monitor and manage your CSR compliance</p></div>
+    <div class="grid-3" style="margin-bottom:1.5rem">
+      <div class="stat-card teal"><div class="stat-icon">💰</div><div class="stat-val" id="csrBudget2">₹0 Cr</div><div class="stat-label">Total CSR Budget</div></div>
+      <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-val" id="csrSpent2">₹0</div><div class="stat-label">Amount Spent</div></div>
+      <div class="stat-card amber"><div class="stat-icon">⏳</div><div class="stat-val" id="csrRemaining">₹0 Cr</div><div class="stat-label">Remaining Budget</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Log CSR Activity</div></div>
+        <div class="form-group"><label class="form-label">Activity Type</label>
+          <select class="form-select" id="csrActivityType">
+            <option>Surplus Donation</option><option>Cash Donation to NGO</option>
+            <option>Employee Volunteering</option><option>Skill Development Program</option>
+            <option>Environmental Initiative</option><option>Healthcare Camp</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Amount (₹)</label><input type="number" class="form-input" id="csrAmount" placeholder="e.g. 50000"/></div>
+          <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="csrDate"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Description</label><input type="text" class="form-input" id="csrDesc" placeholder="Brief description"/></div>
+        <div class="form-group"><label class="form-label">NGO Partner</label><input type="text" class="form-input" id="csrNGO" placeholder="NGO name if applicable"/></div>
+        <button class="btn btn-primary" onclick="logCSRActivity()" style="width:100%">Log Activity</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Activity History</div></div>
+        <div id="csrHistory"><div class="empty-state"><span class="empty-icon">📋</span><p>No activities logged yet</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SURPLUS -->
+  <div class="view" id="view-surplus">
+    <div class="page-header"><h1>Surplus Inventory 📦</h1><p>Manage and donate your company's surplus resources</p></div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:1.5rem">
+      <button class="btn btn-primary" onclick="openDonateModal()">+ Add Surplus Item</button>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Current Surplus Listings</div>
+        <div style="display:flex;gap:0.5rem"><span class="badge badge-green" id="surplusAvail">0 Available</span><span class="badge badge-amber" id="surplusClaimed">0 Claimed</span></div>
+      </div>
+      <div id="surplusList"><div class="empty-state"><span class="empty-icon">📦</span><p>No surplus items yet. Add your first item!</p></div></div>
+    </div>
+  </div>
+
+  <!-- DONATION HISTORY -->
+  <div class="view" id="view-donations">
+    <div class="page-header"><h1>Donation History 🤝</h1><p>All your corporate donations and their impact</p></div>
+    <div class="card">
+      <table class="table">
+        <thead><tr><th>Item</th><th>Category</th><th>Quantity</th><th>City</th><th>Claimed By</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody id="donationHistory"><tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--slate2)">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- AI REPORT -->
+  <div class="view" id="view-aiReport">
+    <div class="page-header"><h1>AI Impact Report 🤖</h1><p>Generate CSR compliance reports using Gemini AI</p></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Generate Report</div></div>
+        <div class="form-group"><label class="form-label">Report Type</label>
+          <select class="form-select" id="reportType">
+            <option>Annual CSR Compliance Report</option><option>Quarterly Impact Summary</option>
+            <option>Donation Impact Report</option><option>Sustainability Report</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Financial Year</label>
+          <select class="form-select" id="reportYear"><option>2025-26</option><option>2024-25</option></select>
+        </div>
+        <button class="btn btn-primary" onclick="generateReport()" style="width:100%" id="generateBtn">🤖 Generate AI Report</button>
+        <p style="font-size:0.78rem;color:var(--slate2);margin-top:0.5rem;text-align:center">Powered by Google Gemini AI</p>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Generated Report</div>
+          <button class="btn btn-outline btn-sm" id="downloadReportBtn" style="display:none" onclick="downloadReport()">⬇ Download</button>
+        </div>
+        <div id="reportOutput"><div class="empty-state"><span class="empty-icon">🤖</span><p>Click Generate to create your AI-powered CSR report</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI NGO MATCH -->
+  <div class="view" id="view-aiMatch">
+    <div class="page-header"><h1>AI NGO Matching 🎯</h1><p>Find the best NGO for your surplus donation</p></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Describe Your Surplus</div></div>
+        <div class="form-group"><label class="form-label">What do you want to donate?</label>
+          <textarea class="form-input" id="surplusDesc" rows="4" placeholder="e.g. 500 kg rice, 200 winter jackets..."></textarea>
+        </div>
+        <div class="form-group"><label class="form-label">Your City</label><input type="text" class="form-input" id="matchCity" placeholder="e.g. Mumbai"/></div>
+        <button class="btn btn-primary" onclick="findNGOMatch()" style="width:100%" id="matchBtn">🎯 Find Best NGO Match</button>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">AI Recommendations</div></div>
+        <div id="matchOutput"><div class="empty-state"><span class="empty-icon">🎯</span><p>Describe your surplus to get AI recommendations</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="view" id="view-settings">
+    <div class="page-header"><h1>Company Settings ⚙️</h1><p>Update your corporate profile</p></div>
+    <div class="card" style="max-width:600px">
+      <div class="card-header"><div class="card-title">Company Profile</div></div>
+      <div class="form-group"><label class="form-label">Company Name</label><input type="text" class="form-input" id="settingCompany"/></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Industry</label><input type="text" class="form-input" id="settingIndustry"/></div>
+        <div class="form-group"><label class="form-label">GSTIN</label><input type="text" class="form-input" id="settingGSTIN"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Annual Revenue (₹ Cr)</label><input type="number" class="form-input" id="settingRevenue"/></div>
+        <div class="form-group"><label class="form-label">CSR Budget (₹ Cr)</label><input type="number" class="form-input" id="settingCSR"/></div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+    </div>
+  </div>
+</main>
+
+<!-- DONATE MODAL -->
+<div class="modal-overlay" id="donateModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">📦 Add Surplus Item</div><button class="modal-close" onclick="closeDonateModal()">×</button></div>
+    <div class="form-group"><label class="form-label">Item Title</label><input type="text" class="form-input" id="donTitle" placeholder="e.g. Office Chairs, Rice Bags"/></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Category</label>
+        <select class="form-select" id="donCategory">
+          <option value="FOOD">🍱 Food</option><option value="CLOTHES">👗 Clothes</option>
+          <option value="BOOKS">📚 Books</option><option value="OTHER">📦 Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Quantity</label><input type="number" class="form-input" id="donQty" placeholder="e.g. 100"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">City</label><input type="text" class="form-input" id="donCity" placeholder="e.g. Mumbai"/></div>
+      <div class="form-group"><label class="form-label">Pickup Date</label><input type="date" class="form-input" id="donDate"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Address</label><input type="text" class="form-input" id="donAddress" placeholder="Full pickup address"/></div>
+    <div style="display:flex;gap:1rem">
+      <button class="btn btn-primary" onclick="submitDonation()" style="flex:1">Submit Donation</button>
+      <button class="btn btn-outline" onclick="closeDonateModal()" style="flex:1">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+const role = localStorage.getItem('role');
+if (!token || role !== 'CORPORATE') window.location.href = 'login.html';
+
+const GEMINI_KEY = 'AIzaSyAIhi6N-BbLK1aADNrJsskrkVIyVvoX3UY';
+let profile = {};
+let donations = [];
+let csrActivities = JSON.parse(localStorage.getItem('csrActivities') || '[]');
+let categoryChart = null;
+let generatedReport = '';
+
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+document.getElementById('csrDate').value = new Date().toISOString().split('T')[0];
+document.getElementById('donDate').value = new Date(Date.now()+7*24*60*60*1000).toISOString().split('T')[0];
+
+function showView(v,btn) {
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(v==='surplus') loadSurplus();
+  if(v==='donations') loadDonationHistory();
+  if(v==='csr') renderCSRHistory();
+}
+
+function showNotification(msg,type='success') {
+  const n=document.getElementById('notification');
+  n.textContent=msg; n.className=`notification ${type} show`;
+  setTimeout(()=>n.classList.remove('show'),3000);
+}
+
+async function loadProfile() {
+  try {
+    const res = await fetch('/api/auth/profile',{headers:{'Authorization':'Bearer '+token}});
+    profile = await res.json();
+    document.getElementById('welcomeMsg').textContent=`Welcome, ${profile.companyName||profile.name}! 💼`;
+    document.getElementById('sidebarCompany').textContent=profile.companyName||profile.name;
+    document.getElementById('sidebarIndustry').textContent=profile.industry||'Corporate';
+    document.getElementById('settingCompany').value=profile.companyName||'';
+    document.getElementById('settingIndustry').value=profile.industry||'';
+    document.getElementById('settingGSTIN').value=profile.gstin||'';
+    document.getElementById('settingRevenue').value=profile.annualRevenue||'';
+    document.getElementById('settingCSR').value=profile.csrBudget||'';
+    const budget=profile.csrBudget||0;
+    const spent=csrActivities.reduce((a,c)=>a+c.amount,0);
+    const pct=budget>0?Math.round((spent/(budget*10000000))*100):0;
+    document.getElementById('statCSRBudget').textContent=`₹${budget}Cr`;
+    document.getElementById('statCSRSpent').textContent=`₹${spent.toLocaleString()}`;
+    document.getElementById('statCSRPct').textContent=`${pct}% utilized`;
+    document.getElementById('csrBudget2').textContent=`₹${budget}Cr`;
+    document.getElementById('csrSpent2').textContent=`₹${spent.toLocaleString()}`;
+    document.getElementById('csrRemaining').textContent=`₹${Math.max(0,budget*10000000-spent).toLocaleString()}`;
+    document.getElementById('meterBudget').textContent=`₹${budget}Cr`;
+    document.getElementById('meterPct').textContent=`${pct}%`;
+    document.getElementById('meterFill').style.width=`${Math.min(pct,100)}%`;
+    document.getElementById('meterFill').style.background=pct>=100?'var(--green)':pct>=50?'var(--teal2)':'var(--amber)';
+    document.getElementById('sidebarCSRPct').textContent=`${pct}%`;
+    document.getElementById('sidebarCSRBar').style.width=`${Math.min(pct,100)}%`;
+    document.getElementById('complianceBadge').textContent=pct>=100?'✅ Compliant':pct>=50?'⏳ On Track':'⚠️ Behind';
+    document.getElementById('complianceBadge').className=`badge ${pct>=100?'badge-green':pct>=50?'badge-blue':'badge-amber'}`;
+  } catch(e){console.error(e);}
+}
+
+async function loadDonations() {
+  try {
+    const res=await fetch('/api/donations',{headers:{'Authorization':'Bearer '+token}});
+    donations=await res.json();
+    const my=donations.filter(d=>d.donor?.email===profile.email||d.donor?.id===profile.id);
+    document.getElementById('statDonations').textContent=my.length;
+    document.getElementById('statLives').textContent=my.reduce((a,d)=>a+(parseInt(d.quantity)||0),0);
+    const tbody=document.getElementById('recentDonations');
+    if(my.length===0){tbody.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--slate2)">No donations yet. Add your first surplus item!</td></tr>`;return;}
+    tbody.innerHTML=my.slice(0,5).map(d=>`<tr><td><strong>${d.title}</strong></td><td><span class="badge badge-blue">${d.category}</span></td><td>${d.quantity}</td><td>${d.claimedBy?.name||'—'}</td><td><span class="badge ${d.status==='AVAILABLE'?'badge-green':d.status==='CLAIMED'?'badge-amber':'badge-blue'}">${d.status}</span></td><td>${d.createdAt?new Date(d.createdAt).toLocaleDateString('en-IN'):'Today'}</td></tr>`).join('');
+    const cats={FOOD:0,CLOTHES:0,BOOKS:0,OTHER:0};
+    my.forEach(d=>{if(cats[d.category]!==undefined)cats[d.category]++;});
+    renderCategoryChart(cats);
+  } catch(e){console.error(e);}
+}
+
+function renderCategoryChart(cats) {
+  const ctx=document.getElementById('categoryChart').getContext('2d');
+  if(categoryChart)categoryChart.destroy();
+  categoryChart=new Chart(ctx,{type:'doughnut',data:{labels:['Food','Clothes','Books','Other'],datasets:[{data:[cats.FOOD,cats.CLOTHES,cats.BOOKS,cats.OTHER],backgroundColor:['#F5A623','#14A085','#8B5CF6','#3B82F6'],borderWidth:0}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:12}}}}}});
+}
+
+async function loadSurplus() {
+  try {
+    const res=await fetch('/api/donations',{headers:{'Authorization':'Bearer '+token}});
+    const all=await res.json();
+    const my=all.filter(d=>d.donor?.email===profile.email||d.donor?.id===profile.id);
+    document.getElementById('surplusAvail').textContent=`${my.filter(d=>d.status==='AVAILABLE').length} Available`;
+    document.getElementById('surplusClaimed').textContent=`${my.filter(d=>d.status==='CLAIMED').length} Claimed`;
+    const el=document.getElementById('surplusList');
+    if(my.length===0){el.innerHTML=`<div class="empty-state"><span class="empty-icon">📦</span><p>No surplus items listed yet.</p></div>`;return;}
+    el.innerHTML=my.map(d=>`<div class="impact-item"><div class="impact-icon" style="background:${d.category==='FOOD'?'#FEF3C7':d.category==='CLOTHES'?'#D1FAE5':d.category==='BOOKS'?'#DBEAFE':'#F3E8FF'}">${d.category==='FOOD'?'🍱':d.category==='CLOTHES'?'👗':d.category==='BOOKS'?'📚':'📦'}</div><div class="impact-info"><strong>${d.title}</strong><span>📍 ${d.city} · Pickup: ${d.pickupDate}</span></div><div style="text-align:right"><div class="impact-val">${d.quantity}</div><span class="badge ${d.status==='AVAILABLE'?'badge-green':'badge-amber'}">${d.status}</span></div></div>`).join('');
+  } catch(e){}
+}
+
+async function loadDonationHistory() {
+  try {
+    const res=await fetch('/api/donations',{headers:{'Authorization':'Bearer '+token}});
+    const all=await res.json();
+    const my=all.filter(d=>d.donor?.email===profile.email||d.donor?.id===profile.id);
+    const tbody=document.getElementById('donationHistory');
+    if(my.length===0){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--slate2)">No donations yet.</td></tr>`;return;}
+    tbody.innerHTML=my.map(d=>`<tr><td><strong>${d.title}</strong></td><td><span class="badge badge-blue">${d.category}</span></td><td>${d.quantity}</td><td>📍${d.city}</td><td>${d.claimedBy?.name||'—'}</td><td><span class="badge ${d.status==='AVAILABLE'?'badge-green':d.status==='CLAIMED'?'badge-amber':'badge-blue'}">${d.status}</span></td><td>${d.createdAt?new Date(d.createdAt).toLocaleDateString('en-IN'):'Today'}</td></tr>`).join('');
+  } catch(e){}
+}
+
+function logCSRActivity() {
+  const activity={type:document.getElementById('csrActivityType').value,amount:parseInt(document.getElementById('csrAmount').value)||0,date:document.getElementById('csrDate').value,desc:document.getElementById('csrDesc').value,ngo:document.getElementById('csrNGO').value,id:Date.now()};
+  if(!activity.amount||!activity.date){showNotification('Please fill amount and date!','error');return;}
+  csrActivities.push(activity);
+  localStorage.setItem('csrActivities',JSON.stringify(csrActivities));
+  document.getElementById('csrAmount').value='';
+  document.getElementById('csrDesc').value='';
+  document.getElementById('csrNGO').value='';
+  renderCSRHistory();
+  loadProfile();
+  showNotification('CSR activity logged! ✅');
+}
+
+function renderCSRHistory() {
+  const el=document.getElementById('csrHistory');
+  if(csrActivities.length===0){el.innerHTML=`<div class="empty-state"><span class="empty-icon">📋</span><p>No activities logged yet</p></div>`;return;}
+  el.innerHTML=csrActivities.slice().reverse().map(a=>`<div class="impact-item"><div class="impact-icon" style="background:var(--light)">💰</div><div class="impact-info"><strong>${a.type}</strong><span>${a.date}${a.ngo?' · '+a.ngo:''}</span></div><div class="impact-val">₹${a.amount.toLocaleString()}</div></div>`).join('');
+}
+
+function openDonateModal(){document.getElementById('donateModal').classList.add('show');}
+function closeDonateModal(){document.getElementById('donateModal').classList.remove('show');}
+
+async function submitDonation() {
+  const body={title:document.getElementById('donTitle').value,category:document.getElementById('donCategory').value,quantity:document.getElementById('donQty').value,city:document.getElementById('donCity').value,pickupDate:document.getElementById('donDate').value,address:document.getElementById('donAddress').value,phone:profile.phone};
+  if(!body.title||!body.quantity||!body.city){showNotification('Please fill all required fields!','error');return;}
+  try {
+    const res=await fetch('/api/donations',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(body)});
+    if(res.ok){showNotification('Surplus item listed! ✅');closeDonateModal();loadDonations();document.getElementById('donTitle').value='';document.getElementById('donQty').value='';document.getElementById('donCity').value='';document.getElementById('donAddress').value='';}
+  } catch(e){showNotification('Error submitting','error');}
+}
+
+async function generateReport() {
+  const btn=document.getElementById('generateBtn');
+  const output=document.getElementById('reportOutput');
+  btn.innerHTML='<span class="loading-spinner"></span> Generating with Gemini AI...';
+  btn.disabled=true;
+  const my=donations.filter(d=>d.donor?.email===profile.email||d.donor?.id===profile.id);
+  const totalQty=my.reduce((a,d)=>a+(parseInt(d.quantity)||0),0);
+  const csrTotal=csrActivities.reduce((a,c)=>a+c.amount,0);
+  const prompt=`Generate a professional CSR Impact Report for ${profile.companyName||profile.name}.\n\nCompany: ${profile.companyName||profile.name}\nIndustry: ${profile.industry||'Corporate'}\nAnnual Revenue: ₹${profile.annualRevenue||0} Crore\nCSR Budget: ₹${profile.csrBudget||0} Crore\nTotal Donations: ${my.length} items, ${totalQty} units\nCSR Activities Total: ₹${csrTotal.toLocaleString()}\nReport: ${document.getElementById('reportType').value}\nFY: ${document.getElementById('reportYear').value}\n\nWrite a formal, professional CSR compliance report with: Executive Summary, Compliance Status, Key Initiatives, Impact Metrics, NGO Partnerships, Future Roadmap, Conclusion. Include specific numbers.`;
+  try {
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const data=await res.json();
+    generatedReport=data.candidates?.[0]?.content?.parts?.[0]?.text||'Could not generate. Try again.';
+    output.innerHTML=`<div class="ai-report-box"><pre>${generatedReport}</pre></div>`;
+    document.getElementById('downloadReportBtn').style.display='block';
+  } catch(e){output.innerHTML=`<div class="empty-state"><span class="empty-icon">❌</span><p>AI unavailable. Try again.</p></div>`;}
+  btn.innerHTML='🤖 Generate AI Report';
+  btn.disabled=false;
+}
+
+function downloadReport() {
+  const blob=new Blob([generatedReport],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`CSR_Report_${profile.companyName||'Company'}_${new Date().getFullYear()}.txt`;
+  a.click();
+}
+
+async function findNGOMatch() {
+  const btn=document.getElementById('matchBtn');
+  const output=document.getElementById('matchOutput');
+  const desc=document.getElementById('surplusDesc').value;
+  const city=document.getElementById('matchCity').value;
+  if(!desc){showNotification('Please describe your surplus!','error');return;}
+  btn.innerHTML='<span class="loading-spinner"></span> Finding match...';
+  btn.disabled=true;
+  const prompt=`You are an NGO matching expert.\nCorporate wants to donate: ${desc}\nLocation: ${city||'India'}\n\nSuggest:\n1. Best NGO type for this donation\n2. How to package/categorize\n3. Expected impact\n4. Best pickup timing\n5. Special handling instructions\n\nBe specific and practical.`;
+  try {
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+    const data=await res.json();
+    const suggestion=data.candidates?.[0]?.content?.parts?.[0]?.text||'Could not generate suggestions.';
+    output.innerHTML=`<div class="ai-report-box"><pre>${suggestion}</pre></div>`;
+  } catch(e){output.innerHTML=`<div class="empty-state"><span class="empty-icon">❌</span><p>AI unavailable.</p></div>`;}
+  btn.innerHTML='🎯 Find Best NGO Match';
+  btn.disabled=false;
+}
+
+function saveSettings(){showNotification('Settings saved! ✅');}
+function logout(){localStorage.clear();window.location.href='login.html';}
+
+async function init(){await loadProfile();await loadDonations();}
+init();
+</script>
+</body>
+</html>
