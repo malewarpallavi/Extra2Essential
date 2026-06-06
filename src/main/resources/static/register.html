@@ -206,6 +206,11 @@
         <span class="role-name">Volunteer</span>
         <span class="role-desc">I want to help collect</span>
       </div>
+      <div class="role-btn" id="corporateBtn" onclick="selectRole('CORPORATE')">
+        <span class="role-emoji">💼</span>
+        <span class="role-name">Corporate</span>
+        <span class="role-desc">CSR & surplus management</span>
+      </div>
     </div>
 
     <div class="error-msg" id="errorMsg"></div>
@@ -258,6 +263,39 @@
       </div>
     </div>
 
+    <div id="corporateFields" style="display:none">
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" id="companyName" placeholder="e.g. Tata Motors Ltd"/>
+      </div>
+      <div class="form-group">
+        <label>Industry</label>
+        <select id="industry" style="width:100%;padding:0.85rem 1rem;border:1.5px solid var(--border);border-radius:12px;font-size:0.95rem;font-family:'DM Sans',sans-serif;background:var(--white)">
+          <option value="">Select Industry</option>
+          <option>Manufacturing</option>
+          <option>IT & Software</option>
+          <option>Banking & Finance</option>
+          <option>Healthcare</option>
+          <option>Retail</option>
+          <option>Food & Beverage</option>
+          <option>Education</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>GSTIN</label>
+        <input type="text" id="gstin" placeholder="e.g. 27AAPFU0939F1ZV"/>
+      </div>
+      <div class="form-group">
+        <label>Annual Revenue (₹ Crore)</label>
+        <input type="number" id="annualRevenue" placeholder="e.g. 500"/>
+      </div>
+      <div class="form-group">
+        <label>CSR Budget (₹ Crore)</label>
+        <input type="number" id="csrBudget" placeholder="e.g. 10"/>
+      </div>
+    </div>
+
     <button class="btn-submit" id="registerBtn" onclick="handleRegister()">
       Create Account →
     </button>
@@ -276,9 +314,14 @@
   function selectRole(role) 
   {
     selectedRole = role;
-    document.getElementById('donorBtn').classList.toggle('active', role === 'DONOR');
-    document.getElementById('ngoBtn').classList.toggle('active', role === 'NGO');
-    document.getElementById('volunteerBtn').classList.toggle('active', role === 'VOLUNTEER');
+    document.getElementById('donorBtn').classList.toggle('active', role==='DONOR');
+    document.getElementById('ngoBtn').classList.toggle('active', role==='NGO');
+    document.getElementById('volunteerBtn').classList.toggle('active', role==='VOLUNTEER');
+    document.getElementById('corporateBtn').classList.toggle('active', role==='CORPORATE');
+    
+    // Show corporate fields only for CORPORATE role
+    document.getElementById('corporateFields').style.display = 
+      role === 'CORPORATE' ? 'block' : 'none';
   }
 
   async function handleRegister() 
@@ -329,10 +372,15 @@
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name, city, email, password, 
+        body: JSON.stringify({
+          name, city, email, password,
           role: selectedRole,
-          phone: document.getElementById('phone').value 
+          phone: document.getElementById('phone').value,
+          companyName: document.getElementById('companyName')?.value,
+          industry: document.getElementById('industry')?.value,
+          gstin: document.getElementById('gstin')?.value,
+          annualRevenue: document.getElementById('annualRevenue')?.value,
+          csrBudget: document.getElementById('csrBudget')?.value,
         })
       });
 

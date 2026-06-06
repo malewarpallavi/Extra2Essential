@@ -13,6 +13,11 @@
       --mid: #3a4a35; --text: #2d3a28; --muted: #7a8c73;
       --white: #ffffff; --error: #e53e3e; --border: #e2ede8;
     }
+    .register-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
     body {
       font-family: 'DM Sans', sans-serif;
       background: var(--cream); color: var(--text);
@@ -116,6 +121,7 @@
       <a href="register.html?role=DONOR" class="register-link">📦 Donor</a>
       <a href="register.html?role=NGO" class="register-link">🏢 NGO</a>
       <a href="register.html?role=VOLUNTEER" class="register-link">🙋 Volunteer</a>
+      <a href="register.html?role=CORPORATE" class="register-link">💼 Corporate</a>
     </div>
   </div>
 </div>
@@ -150,6 +156,7 @@
           if (data.role === 'DONOR') window.location.href = 'donor-dashboard.html';
           else if (data.role === 'NGO') window.location.href = 'ngo-dashboard.html';
           else if (data.role === 'VOLUNTEER') window.location.href = 'volunteer-dashboard.html';
+          else if (data.role === 'CORPORATE') window.location.href = 'corporate-dashboard.html';
           else window.location.href = 'index.html';
         }, 1200);
       } else {

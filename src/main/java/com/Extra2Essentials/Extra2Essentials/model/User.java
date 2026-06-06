@@ -31,6 +31,12 @@ public class User {
 
     private String city;
     private String phone;
+    private String companyName;
+    private String industry;
+    private String gstin;
+    private Double annualRevenue;
+    private Double csrBudget;
+    private Double csrSpent;
     private String address;
     private Double latitude;
     private Double longitude;

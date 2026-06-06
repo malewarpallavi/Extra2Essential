@@ -1,9 +1,4 @@
 target/
 *.log
-app.log
-app:log
-*.class
-.env
-*.jar
-HELP.md
-.mvn/wrapper/maven-wrapper.jar
+.idea/
+.vscode/
